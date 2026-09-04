@@ -41,6 +41,7 @@ create table if not exists profiles (
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists profiles_set_updated_at on profiles;
 create trigger profiles_set_updated_at
   before update on profiles
   for each row execute function set_updated_at();
@@ -89,6 +90,7 @@ create table if not exists product_categories (
   updated_at timestamptz not null default now()
 );
 
+drop trigger if exists product_categories_set_updated_at on product_categories;
 create trigger product_categories_set_updated_at
   before update on product_categories
   for each row execute function set_updated_at();
@@ -120,6 +122,7 @@ create index if not exists idx_products_category on products (category_id);
 create index if not exists idx_products_active_featured on products (is_active, is_featured);
 create index if not exists idx_products_name_search on products using gin (to_tsvector('english', name || ' ' || short_description));
 
+drop trigger if exists products_set_updated_at on products;
 create trigger products_set_updated_at
   before update on products
   for each row execute function set_updated_at();
@@ -145,6 +148,7 @@ create table if not exists addresses (
 
 create index if not exists idx_addresses_profile on addresses (profile_id);
 
+drop trigger if exists addresses_set_updated_at on addresses;
 create trigger addresses_set_updated_at
   before update on addresses
   for each row execute function set_updated_at();
@@ -179,6 +183,7 @@ create index if not exists idx_orders_payment_status on orders (payment_status);
 create index if not exists idx_orders_order_status on orders (order_status);
 create unique index if not exists idx_orders_fano_reference on orders (fano_payment_reference) where fano_payment_reference is not null;
 
+drop trigger if exists orders_set_updated_at on orders;
 create trigger orders_set_updated_at
   before update on orders
   for each row execute function set_updated_at();
@@ -221,6 +226,7 @@ create table if not exists payments (
 create unique index if not exists idx_payments_provider_reference on payments (provider, provider_reference);
 create index if not exists idx_payments_order on payments (order_id);
 
+drop trigger if exists payments_set_updated_at on payments;
 create trigger payments_set_updated_at
   before update on payments
   for each row execute function set_updated_at();
@@ -257,19 +263,26 @@ alter table admin_users enable row level security;
 
 -- profiles: a customer can read/update only their own profile. Admins can
 -- read all profiles (needed for the admin order list).
+drop policy if exists "profiles_select_own" on profiles;
 create policy "profiles_select_own" on profiles for select using (auth.uid() = id or is_admin());
+drop policy if exists "profiles_update_own" on profiles;
 create policy "profiles_update_own" on profiles for update using (auth.uid() = id);
 
 -- addresses: fully owned by the customer.
+drop policy if exists "addresses_all_own" on addresses;
 create policy "addresses_all_own" on addresses for all
   using (auth.uid() = profile_id or is_admin())
   with check (auth.uid() = profile_id);
 
 -- product_categories / products: public read of active rows; admin-only writes.
+drop policy if exists "categories_public_read" on product_categories;
 create policy "categories_public_read" on product_categories for select using (true);
+drop policy if exists "categories_admin_write" on product_categories;
 create policy "categories_admin_write" on product_categories for all using (is_admin()) with check (is_admin());
 
+drop policy if exists "products_public_read" on products;
 create policy "products_public_read" on products for select using (is_active = true or is_admin());
+drop policy if exists "products_admin_write" on products;
 create policy "products_admin_write" on products for all using (is_admin()) with check (is_admin());
 
 -- orders: a customer can only ever see their own orders (matched by
@@ -279,15 +292,18 @@ create policy "products_admin_write" on products for all using (is_admin()) with
 -- see everything. Nobody can INSERT/UPDATE orders directly from the browser
 -- — that only ever happens via the service-role key inside Pages Functions,
 -- which bypasses RLS by design (server-authoritative pricing/payment state).
+drop policy if exists "orders_select_own" on orders;
 create policy "orders_select_own" on orders for select
   using (auth.uid() = customer_id or is_admin());
 
+drop policy if exists "order_items_select_own" on order_items;
 create policy "order_items_select_own" on order_items for select
   using (
     is_admin() or
     exists (select 1 from orders o where o.id = order_items.order_id and o.customer_id = auth.uid())
   );
 
+drop policy if exists "payments_select_own" on payments;
 create policy "payments_select_own" on payments for select
   using (
     is_admin() or
@@ -295,5 +311,7 @@ create policy "payments_select_own" on payments for select
   );
 
 -- email_events / admin_users: admin-only visibility, no client writes ever.
+drop policy if exists "email_events_admin_read" on email_events;
 create policy "email_events_admin_read" on email_events for select using (is_admin());
+drop policy if exists "admin_users_admin_read" on admin_users;
 create policy "admin_users_admin_read" on admin_users for select using (is_admin());
