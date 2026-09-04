@@ -1,0 +1,16 @@
+name = "avernic-uk"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
+
+# Local development only. In the Cloudflare dashboard (Pages project ->
+# Settings -> Environment variables), set the SAME variable names as
+# secrets/production values for Preview and Production environments —
+# never commit real values here.
+[vars]
+SITE_URL = "http://localhost:5173"
+
+# Secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, FANO_*, etc.) are NOT
+# set here. For local `wrangler pages dev`, create a `.dev.vars` file
+# (already git-ignored) with KEY=value lines. In production, set them via:
+#   wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY
+# or the Cloudflare Pages dashboard.

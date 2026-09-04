@@ -1,0 +1,7 @@
+# Netlify SPA fallback: this is a client-side-routed React app (react-router),
+# so every path that isn't a real static file must serve index.html and let
+# the router handle it — otherwise a direct link or refresh on any route
+# other than "/" (e.g. /shop, /product/foo, /account/orders) 404s on Netlify.
+# (Cloudflare Pages does this automatically for a Vite SPA and doesn't need
+# this file, but Netlify requires it explicitly.)
+/*   /index.html   200
