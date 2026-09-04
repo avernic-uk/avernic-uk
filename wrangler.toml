@@ -12,10 +12,17 @@ pages_build_output_dir = "dist"
 # VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are safe to commit: the anon
 # key only ever grants what Row Level Security policies allow. Never put
 # the service_role key here — that stays a Dashboard Secret (see README).
+#
+# SUPABASE_URL (no VITE_ prefix) is a SEPARATE variable read by the
+# Cloudflare Pages Functions in functions/ (the /api/* routes, including
+# everything under /api/admin/*) via `context.env` — Vite's VITE_ baking
+# only reaches the browser bundle, Functions never see import.meta.env.
+# Same URL value as VITE_SUPABASE_URL above, just without the prefix.
 [vars]
 SITE_URL = "https://avernic-uk.pages.dev"
 VITE_SUPABASE_URL = "https://olgcumyhyfyjaeevqowx.supabase.co"
 VITE_SUPABASE_ANON_KEY = "sb_publishable_TkOiGuxX94IyB9TOjede0g_2qCOI6Gp"
+SUPABASE_URL = "https://olgcumyhyfyjaeevqowx.supabase.co"
 
 # Secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, FANO_*, etc.) are NOT
 # set here — they must never be committed. For local `wrangler pages dev`,
