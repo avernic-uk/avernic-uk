@@ -2,15 +2,25 @@ name = "avernic-uk"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "dist"
 
-# Local development only. In the Cloudflare dashboard (Pages project ->
-# Settings -> Environment variables), set the SAME variable names as
-# secrets/production values for Preview and Production environments —
-# never commit real values here.
+# Non-secret variables. Cloudflare Pages hands variable management for this
+# project over to this file once ANY [vars] entry exists here (the Dashboard
+# then only manages true Secrets — see below). VITE_-prefixed values are
+# baked into the frontend bundle at build time by Vite, so they must live
+# here (or in the Dashboard's own [vars]-driven config) rather than only in
+# a local .env — a local-only .env never reaches the Cloudflare build.
+#
+# VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are safe to commit: the anon
+# key only ever grants what Row Level Security policies allow. Never put
+# the service_role key here — that stays a Dashboard Secret (see README).
 [vars]
-SITE_URL = "http://localhost:5173"
+SITE_URL = "https://avernic-uk.pages.dev"
+VITE_SUPABASE_URL = "https://olgcumyhyfyjaeevqowx.supabase.co"
+VITE_SUPABASE_ANON_KEY = "sb_publishable_TkOiGuxX94IyB9TOjede0g_2qCOI6Gp"
 
 # Secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, FANO_*, etc.) are NOT
-# set here. For local `wrangler pages dev`, create a `.dev.vars` file
-# (already git-ignored) with KEY=value lines. In production, set them via:
-#   wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY
-# or the Cloudflare Pages dashboard.
+# set here — they must never be committed. For local `wrangler pages dev`,
+# create a `.dev.vars` file (already git-ignored) with KEY=value lines. For
+# the deployed site, set them via the Cloudflare Pages dashboard -> this
+# project -> Settings -> Secrets (this is the part that's still managed
+# through the Dashboard, per the "Environment variables ... managed through
+# wrangler.toml" notice), or `wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY`.
