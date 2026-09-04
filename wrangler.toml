@@ -23,11 +23,18 @@ SITE_URL = "https://avernic-uk.pages.dev"
 VITE_SUPABASE_URL = "https://olgcumyhyfyjaeevqowx.supabase.co"
 VITE_SUPABASE_ANON_KEY = "sb_publishable_TkOiGuxX94IyB9TOjede0g_2qCOI6Gp"
 SUPABASE_URL = "https://olgcumyhyfyjaeevqowx.supabase.co"
+RESEND_FROM_EMAIL = "orders@avernic.uk"
+ADMIN_NOTIFICATION_EMAIL = "harview@gmx.com"
 
 # Secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, FANO_*, etc.) are NOT
-# set here — they must never be committed. For local `wrangler pages dev`,
-# create a `.dev.vars` file (already git-ignored) with KEY=value lines. For
-# the deployed site, set them via the Cloudflare Pages dashboard -> this
-# project -> Settings -> Secrets (this is the part that's still managed
-# through the Dashboard, per the "Environment variables ... managed through
-# wrangler.toml" notice), or `wrangler pages secret put SUPABASE_SERVICE_ROLE_KEY`.
+# set here — they must never be committed. RESEND_API_KEY in particular is
+# NOT added above on purpose, even though you shared it in chat — it's a
+# real secret (it can send email as your domain), and this file is
+# considered committed-to-git, safe-to-be-public content throughout this
+# project. It goes in as a Dashboard Secret instead (see next steps).
+# For local `wrangler pages dev`, create a `.dev.vars` file (already
+# git-ignored) with KEY=value lines. For the deployed site, set secrets via
+# the Cloudflare Pages dashboard -> this project -> Settings -> Secrets
+# (the part that's still managed through the Dashboard, per the
+# "Environment variables ... managed through wrangler.toml" notice), or
+# `wrangler pages secret put RESEND_API_KEY`.
