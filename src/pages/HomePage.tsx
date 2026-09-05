@@ -79,7 +79,7 @@ export default function HomePage() {
               </ButtonLink>
             </div>
             <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-ink-500">
-              {['Cosmetic skincare only — 18+', 'Delivered across the UK', 'Secure bank-to-bank payment'].map((item) => (
+              {['Laboratory research use only — 18+', 'Delivered across the UK', 'Secure bank-to-bank payment'].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-accent-500">
                     <path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -150,8 +150,7 @@ export default function HomePage() {
             <span className="eyebrow">Featured</span>
             <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Where to start</h2>
             <p className="mt-1.5 text-sm text-ink-600">
-              The products most people build a peptide routine around — a cleanser, a serum, and something for day and
-              night.
+              Our best sellers.
             </p>
           </div>
           <ButtonLink to="/shop" variant="outline" size="sm" className="hidden sm:inline-flex">
@@ -184,7 +183,7 @@ export default function HomePage() {
             <p className="max-w-sm text-sm leading-relaxed text-ink-300 dark:text-ink-600">
               We use HPLC (High-Performance Liquid Chromatography) — a laboratory technique for
               verifying the purity and concentration of active ingredients — to check every
-              skincare formulation we sell.
+              peptide for purity, endotoxins and heavy metals.
             </p>
           </div>
 
@@ -213,8 +212,8 @@ export default function HomePage() {
                     strokeLinejoin="round"
                   />
                 ),
-                title: 'Cosmetic-grade, never medicinal',
-                description: 'Testing confirms formulation quality for topical cosmetic use — our products are skincare, not medicines, and make no medical claims.',
+                title: 'Research quality',
+                description: 'Testing confirms formulation quality for laboratory use — our products are not medicines, and make no medical claims.',
               },
               {
                 icon: (
@@ -265,8 +264,7 @@ export default function HomePage() {
               Peptides, explained plainly
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-ink-600">
-              Peptide skincare is worth understanding before you buy it. Here is the short version, without the
-              marketing.
+              Peptide research is quickly becoming a hot topic in the news, online and from people you see day to day, we want to provide labs with the highest qulity peptides we can offer and guarantee peace of mind in your results.
             </p>
             <ButtonLink to="/faq" variant="outline" size="sm" className="mt-6">
               More questions
