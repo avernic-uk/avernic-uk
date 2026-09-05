@@ -166,6 +166,10 @@ export interface SiteSettings {
   ageNoticeText: string
   /** Empty string means "use the site's default bundled logo". */
   logoUrl: string
+  /** Homepage hero image. Empty falls back to the brand logo mark. */
+  heroImageUrl: string
+  /** Alt text for the hero image — it's content, not decoration, so it needs describing. */
+  heroImageAlt: string
   /** One social profile URL per line. Used as schema.org `sameAs`. */
   socialLinks: string
 }

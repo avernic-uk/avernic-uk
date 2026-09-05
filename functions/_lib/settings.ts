@@ -23,6 +23,9 @@ export interface SiteSettings {
   ageNoticeText: string
   /** Empty string means "use the site's default bundled logo". */
   logoUrl: string
+  /** Homepage hero image. Empty falls back to the brand logo mark. */
+  heroImageUrl: string
+  heroImageAlt: string
   /** One social profile URL per line. Empty is fine — used as schema.org `sameAs`. */
   socialLinks: string
 }
@@ -41,6 +44,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     'Cosmetic peptide serums, moisturisers and treatments, chosen with care and delivered across the United Kingdom — with a straightforward checkout and secure Open Banking payment.',
   ageNoticeText: 'Our products are cosmetic skincare intended for adults aged 18 and over.',
   logoUrl: '',
+  heroImageUrl: '',
+  heroImageAlt: '',
   socialLinks: '',
 }
 
@@ -65,6 +70,8 @@ interface SettingsRow {
   hero_subheading: string
   age_notice_text: string
   logo_url: string
+  hero_image_url: string
+  hero_image_alt: string
   social_links: string
 }
 
@@ -82,6 +89,8 @@ function mapRow(row: SettingsRow): SiteSettings {
     heroSubheading: row.hero_subheading,
     ageNoticeText: row.age_notice_text,
     logoUrl: row.logo_url ?? '',
+    heroImageUrl: row.hero_image_url ?? '',
+    heroImageAlt: row.hero_image_alt ?? '',
     socialLinks: row.social_links ?? '',
   }
 }

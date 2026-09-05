@@ -4,6 +4,7 @@ import { adminFetchJson } from '@/lib/api/adminFetch'
 import { getCategories } from '@/lib/api/products'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { Input, Select, Checkbox } from '@/components/ui/Input'
+import { ImageField } from '@/components/admin/ImageField'
 import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 import type { ProductCategory } from '@/types'
@@ -238,8 +239,14 @@ export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit'
             onChange={(e) => set('compareAtPrice', e.target.value)}
           />
           <Input label="Stock quantity" type="number" min="0" required value={form.stockQuantity} onChange={(e) => set('stockQuantity', e.target.value)} />
-          <Input label="Main image URL" value={form.imageUrl} onChange={(e) => set('imageUrl', e.target.value)} />
         </div>
+
+        <ImageField
+          label="Main image"
+          value={form.imageUrl}
+          onChange={(url) => set('imageUrl', url)}
+          hint="The photo shown on the product page and on product cards. Upload a file, or paste a URL if it is hosted elsewhere. Square images work best on the cards."
+        />
 
         <div>
           <div className="mb-1.5 flex items-center justify-between">
@@ -255,35 +262,39 @@ export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit'
           </div>
           <div className="space-y-2">
             {form.additionalImages.map((img, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  placeholder="Image URL"
+              <div key={index} className="space-y-3 rounded-2xl border border-ink-200 bg-ink-50/60 p-4">
+                <ImageField
+                  label={`Gallery image ${index + 1}`}
                   value={img.url}
-                  onChange={(e) => {
+                  onChange={(url) => {
                     const next = [...form.additionalImages]
-                    next[index] = { ...next[index], url: e.target.value }
+                    next[index] = { ...next[index], url }
                     set('additionalImages', next)
                   }}
-                  className="h-11 flex-1 rounded-xl border border-ink-300 bg-white px-3.5 text-sm text-ink-900 shadow-card focus-visible:outline-2 focus-visible:outline-accent-500 dark:bg-ink-50"
+                  previewClassName="h-16 w-16 object-cover"
                 />
-                <input
-                  placeholder="Alt text"
-                  value={img.alt}
-                  onChange={(e) => {
-                    const next = [...form.additionalImages]
-                    next[index] = { ...next[index], alt: e.target.value }
-                    set('additionalImages', next)
-                  }}
-                  className="h-11 w-40 rounded-xl border border-ink-300 bg-white px-3.5 text-sm text-ink-900 shadow-card focus-visible:outline-2 focus-visible:outline-accent-500 dark:bg-ink-50"
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => set('additionalImages', form.additionalImages.filter((_, i) => i !== index))}
-                >
-                  Remove
-                </Button>
+                <div className="flex items-end gap-2">
+                  <div className="flex-1">
+                    <Input
+                      label="Alt text"
+                      placeholder="Describe this image"
+                      value={img.alt}
+                      onChange={(e) => {
+                        const next = [...form.additionalImages]
+                        next[index] = { ...next[index], alt: e.target.value }
+                        set('additionalImages', next)
+                      }}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => set('additionalImages', form.additionalImages.filter((_, i) => i !== index))}
+                  >
+                    Remove
+                  </Button>
+                </div>
               </div>
             ))}
             {form.additionalImages.length === 0 && <p className="text-xs text-ink-400">No gallery images yet.</p>}

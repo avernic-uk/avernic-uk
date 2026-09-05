@@ -14,6 +14,8 @@ interface SettingsRow {
   hero_subheading: string
   age_notice_text: string
   logo_url: string
+  hero_image_url: string
+  hero_image_alt: string
   social_links: string
 }
 
@@ -31,6 +33,8 @@ function mapSettings(row: SettingsRow): SiteSettings {
     heroSubheading: row.hero_subheading,
     ageNoticeText: row.age_notice_text,
     logoUrl: row.logo_url ?? '',
+    heroImageUrl: row.hero_image_url ?? '',
+    heroImageAlt: row.hero_image_alt ?? '',
     socialLinks: row.social_links ?? '',
   }
 }

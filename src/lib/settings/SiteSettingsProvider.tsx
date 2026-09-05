@@ -22,6 +22,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
     'Cosmetic peptide serums, moisturisers and treatments, chosen with care and delivered across the United Kingdom — with a straightforward checkout and secure Open Banking payment.',
   ageNoticeText: 'Our products are cosmetic skincare intended for adults aged 18 and over.',
   logoUrl: '',
+  heroImageUrl: '',
+  heroImageAlt: '',
   socialLinks: '',
 }
 

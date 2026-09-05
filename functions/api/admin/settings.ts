@@ -30,6 +30,8 @@ const ALLOWED: Record<string, string> = {
   heroSubheading: 'hero_subheading',
   ageNoticeText: 'age_notice_text',
   logoUrl: 'logo_url',
+  heroImageUrl: 'hero_image_url',
+  heroImageAlt: 'hero_image_alt',
   socialLinks: 'social_links',
 }
 

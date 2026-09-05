@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { adminFetchJson } from '@/lib/api/adminFetch'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
+import { ImageField } from '@/components/admin/ImageField'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
@@ -19,6 +20,8 @@ interface SettingsRow {
   hero_subheading: string
   age_notice_text: string
   logo_url: string
+  hero_image_url: string
+  hero_image_alt: string
   social_links: string
 }
 
@@ -35,6 +38,8 @@ interface FormState {
   heroSubheading: string
   ageNoticeText: string
   logoUrl: string
+  heroImageUrl: string
+  heroImageAlt: string
   socialLinks: string
 }
 
@@ -52,6 +57,8 @@ function rowToForm(row: SettingsRow): FormState {
     heroSubheading: row.hero_subheading,
     ageNoticeText: row.age_notice_text,
     logoUrl: row.logo_url,
+    heroImageUrl: row.hero_image_url ?? '',
+    heroImageAlt: row.hero_image_alt ?? '',
     socialLinks: row.social_links,
   }
 }
@@ -104,6 +111,8 @@ export default function AdminSettingsPage() {
           heroSubheading: form.heroSubheading,
           ageNoticeText: form.ageNoticeText,
           logoUrl: form.logoUrl.trim(),
+          heroImageUrl: form.heroImageUrl.trim(),
+          heroImageAlt: form.heroImageAlt.trim(),
           socialLinks: form.socialLinks,
         }),
       })
@@ -133,12 +142,13 @@ export default function AdminSettingsPage() {
             Used for the header, footer and homepage logo. Paste a URL to an image with a transparent
             background if the current one looks boxed-in — leave blank to use the site's default logo.
           </p>
-          <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-            <Input
-              label="Logo image URL"
+          <div className="mt-4">
+            <ImageField
+              label="Logo image"
               value={form.logoUrl}
-              onChange={(e) => set('logoUrl', e.target.value)}
-              hint="PNG or SVG with a transparent background works best."
+              onChange={(url) => set('logoUrl', url)}
+              hint="PNG or SVG with a transparent background works best. Upload a file, or paste a URL if it is already hosted somewhere."
+              previewClassName="h-16 w-16 object-contain p-2"
             />
           </div>
           <div className="mt-4 flex gap-3">
@@ -227,6 +237,21 @@ export default function AdminSettingsPage() {
                 className="w-full rounded-lg border border-ink-300 p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent-500"
               />
             </div>
+
+            <ImageField
+              label="Hero image"
+              value={form.heroImageUrl}
+              onChange={(url) => set('heroImageUrl', url)}
+              hint="Shown beside the heading at the top of the homepage. A photograph of a product you actually sell works best — it shows a first-time visitor what they're buying. Landscape or square, at least 800px wide. Leave blank to show the logo mark instead."
+              previewClassName="h-24 w-32 object-cover"
+            />
+
+            <Input
+              label="Hero image description"
+              value={form.heroImageAlt}
+              onChange={(e) => set('heroImageAlt', e.target.value)}
+              hint="Describe the image in a few words, e.g. “Triple Peptide Renewal Serum bottle”. Read aloud by screen readers and shown if the image fails to load. Leave blank if the image is purely decorative."
+            />
           </div>
         </section>
 

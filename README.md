@@ -15,6 +15,7 @@ A UK-only e-commerce website for Avernic UK, selling cosmetic peptide skincare (
 - [Project structure](#project-structure)
 - [Theme & dark mode](#theme--dark-mode)
 - [SEO](#seo)
+- [Images and uploads](#images-and-uploads)
 - [Analytics](#analytics)
 - [UK-only enforcement](#uk-only-enforcement)
 - [Security notes](#security-notes)
@@ -241,6 +242,32 @@ Both are built by `functions/_lib/llmsText.ts`. The **"What Avernic UK does not 
 them is load-bearing, not boilerplate: searches for "peptides" are dominated by injectable and
 research peptides, and stating the boundary in the document written for machines is what stops an
 answer engine describing this site as a source for them.
+
+## Images and uploads
+
+Product photos, the logo and the homepage hero image are all set from the admin panel, and each field
+accepts **either** an upload **or** a pasted URL (`src/components/admin/ImageField.tsx`).
+
+Uploads go to a public Supabase Storage bucket, `site-images` (migration `0009`), via
+`functions/api/admin/uploads.ts`. That endpoint is the **only** writer: the bucket has a public read
+policy and deliberately no insert/update/delete policy, so writes succeed only because the endpoint
+runs with the service-role key *after* `requireAdmin()` has passed. Without that asymmetry a public
+bucket is an open file drop for anyone who finds the URL.
+
+Limits are enforced in both the endpoint and the bucket itself (so they hold even if the endpoint
+changes): 5MB, and JPEG/PNG/WebP/AVIF/GIF/SVG only. Object keys are `YYYY-MM-DD/slugified-name-
+<random>.ext` — the random suffix means re-uploading `hero.jpg` never silently replaces a `hero.jpg`
+already live on a page, which in turn makes the one-year `Cache-Control` safe.
+
+SVG is allowed because logos often arrive that way. It is worth knowing that an SVG can carry script;
+what contains that here is that only an admin can upload, and Storage serves from its own domain
+rather than `avernic.uk`, so nothing uploaded shares an origin with the shop or its session. Remove
+`image/svg+xml` from `ALLOWED_TYPES` and from the bucket's `allowed_mime_types` to disallow it.
+
+**Hero image.** `site_settings.hero_image_url` replaces the floating logo mark on the homepage when
+set, with a different treatment: a photograph gets a clean frame, while the logo keeps the brass rings
+and float animation that stop a small mark looking adrift. Empty is a valid, good-looking state, not a
+broken one. `hero_image_alt` describes it — a hero photograph is content, not decoration.
 
 ## Analytics
 

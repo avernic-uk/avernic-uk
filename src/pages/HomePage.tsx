@@ -89,15 +89,47 @@ export default function HomePage() {
             </ul>
           </div>
 
+          {/* ----------------------------------------------------------------
+              Two different treatments, because a photograph and a logo mark
+              need opposite things. The logo is a floating mark that earns the
+              brass rings and the glow — without them it's a small icon adrift
+              in white space. A photograph is already a solid object with its
+              own edges, so the same rings crop awkwardly behind it and the
+              heavy gold drop-shadow reads as a colour cast on the product.
+              Set a hero image in Admin → Settings and it gets framed cleanly;
+              leave it blank and the original logo treatment stands.
+          ---------------------------------------------------------------- */}
           <div className="relative flex items-center justify-center py-8 lg:py-0">
-            <div aria-hidden="true" className="absolute h-72 w-72 rounded-full bg-accent-500/20 blur-3xl sm:h-96 sm:w-96" />
-            <div aria-hidden="true" className="absolute h-[22rem] w-[22rem] rounded-full border border-accent-500/15 sm:h-[28rem] sm:w-[28rem]" />
-            <div aria-hidden="true" className="absolute h-[16rem] w-[16rem] rounded-full border border-accent-500/25 sm:h-[20rem] sm:w-[20rem]" />
-            <img
-              src={settings.logoUrl || '/logo-icon.png'}
-              alt=""
-              className="relative h-64 w-auto animate-float drop-shadow-[0_24px_40px_rgb(var(--accent-500)/0.35)] sm:h-80"
-            />
+            {settings.heroImageUrl ? (
+              <>
+                <div
+                  aria-hidden="true"
+                  className="absolute h-64 w-64 rounded-full bg-accent-500/10 blur-3xl sm:h-80 sm:w-80"
+                />
+                <img
+                  src={settings.heroImageUrl}
+                  alt={settings.heroImageAlt}
+                  loading="eager"
+                  // fetchPriority tells the browser this is the largest thing
+                  // above the fold and worth fetching before anything else —
+                  // it is what the page's Largest Contentful Paint is measured
+                  // on, and therefore part of its Core Web Vitals score.
+                  fetchPriority="high"
+                  className="relative max-h-[26rem] w-full rounded-2xl border border-ink-200/70 object-cover shadow-card-hover sm:max-h-[30rem]"
+                />
+              </>
+            ) : (
+              <>
+                <div aria-hidden="true" className="absolute h-72 w-72 rounded-full bg-accent-500/20 blur-3xl sm:h-96 sm:w-96" />
+                <div aria-hidden="true" className="absolute h-[22rem] w-[22rem] rounded-full border border-accent-500/15 sm:h-[28rem] sm:w-[28rem]" />
+                <div aria-hidden="true" className="absolute h-[16rem] w-[16rem] rounded-full border border-accent-500/25 sm:h-[20rem] sm:w-[20rem]" />
+                <img
+                  src={settings.logoUrl || '/logo-icon.png'}
+                  alt=""
+                  className="relative h-64 w-auto animate-float drop-shadow-[0_24px_40px_rgb(var(--accent-500)/0.35)] sm:h-80"
+                />
+              </>
+            )}
           </div>
         </div>
       </section>
