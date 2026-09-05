@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 
 export default function ForgotPasswordPage() {
-  useDocumentMeta({ title: 'Reset your password' })
+  useDocumentMeta({ title: 'Reset your password', noindex: true })
   const { requestPasswordReset } = useAuth()
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)

@@ -6,7 +6,7 @@ import { Card, CardBody } from '@/components/ui/Card'
 import { useIsAdmin } from '@/lib/auth/useIsAdmin'
 
 export default function AccountPage() {
-  useDocumentMeta({ title: 'Your account' })
+  useDocumentMeta({ title: 'Your account', noindex: true })
   const { user, signOut } = useAuth()
   const { isAdmin } = useIsAdmin()
 

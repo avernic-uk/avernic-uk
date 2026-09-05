@@ -30,7 +30,9 @@ const columns = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-ink-200 bg-ink-50">
+    <footer className="relative border-t border-ink-200/70 bg-ink-50">
+      {/* Brass hairline along the top edge */}
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent-500/60 to-transparent" />
       <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-5 lg:py-16">
         <div className="sm:col-span-2 lg:col-span-2">
           <Link to="/" className="flex items-center gap-2">
@@ -46,11 +48,11 @@ export function Footer() {
 
         {columns.map((col) => (
           <div key={col.heading}>
-            <h3 className="text-sm font-semibold text-ink-900">{col.heading}</h3>
+            <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">{col.heading}</h3>
             <ul className="mt-4 space-y-2.5">
               {col.links.map((link) => (
                 <li key={link.to}>
-                  <Link to={link.to} className="text-sm text-ink-600 hover:text-ink-950">
+                  <Link to={link.to} className="text-sm text-ink-600 transition-colors hover:text-accent-600">
                     {link.label}
                   </Link>
                 </li>
@@ -60,7 +62,7 @@ export function Footer() {
         ))}
       </div>
 
-      <div className="border-t border-ink-200">
+      <div className="border-t border-ink-200/70">
         <div className="container-page flex flex-col gap-3 py-6 text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Avernic UK. All rights reserved.</p>
           <p className="max-w-2xl">

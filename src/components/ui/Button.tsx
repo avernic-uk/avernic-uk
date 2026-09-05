@@ -2,15 +2,20 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-full font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-accent-500'
+  'inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none focus-visible:outline-2 focus-visible:outline-accent-500'
 
+// `white` / `ink-*` are semantic (see tailwind.config.ts): in dark mode the
+// primary button becomes a bright pill with dark text. `literal-*` colours
+// are fixed, for text on backgrounds that don't change with the theme.
 const variants = {
-  primary: 'bg-ink-900 text-white hover:bg-ink-800 active:bg-ink-950',
-  accent: 'bg-accent-500 text-ink-950 hover:bg-accent-400 active:bg-accent-600',
+  primary:
+    'bg-ink-900 text-white shadow-card hover:bg-ink-800 hover:-translate-y-px hover:shadow-card-hover active:translate-y-0 active:bg-ink-950',
+  accent:
+    'bg-accent-gradient text-literal-ink shadow-glow-sm hover:-translate-y-px hover:shadow-glow hover:brightness-105 active:translate-y-0 active:brightness-95',
   secondary: 'bg-ink-100 text-ink-900 hover:bg-ink-200 active:bg-ink-200',
-  outline: 'border border-ink-300 text-ink-900 hover:border-ink-500 hover:bg-ink-50',
-  ghost: 'text-ink-700 hover:bg-ink-100',
-  danger: 'bg-danger-500 text-white hover:bg-danger-700',
+  outline: 'border border-ink-300 text-ink-900 hover:border-accent-500/60 hover:bg-ink-50',
+  ghost: 'text-ink-700 hover:bg-ink-100 hover:text-ink-950',
+  danger: 'bg-danger-500 text-literal-white hover:bg-danger-700',
 } as const
 
 const sizes = {

@@ -15,6 +15,7 @@ export default function ShopPage() {
   useDocumentMeta({
     title: 'Shop',
     description: 'Browse the full Avernic UK range of everyday healthcare and wellbeing essentials.',
+    path: '/shop', // one canonical URL for every filter/search/page combination
   })
 
   const [searchParams, setSearchParams] = useSearchParams()
@@ -74,7 +75,8 @@ export default function ShopPage() {
   return (
     <div className="container-page py-10 sm:py-14">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold text-ink-950">Shop</h1>
+        <span className="eyebrow">Full range</span>
+        <h1 className="mt-1 text-3xl font-semibold text-ink-950 sm:text-4xl">Shop</h1>
         <p className="text-sm text-ink-600">
           {q ? (
             <>
@@ -87,7 +89,7 @@ export default function ShopPage() {
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[240px_1fr]">
-        <aside aria-label="Filters" className="space-y-6">
+        <aside aria-label="Filters" className="panel h-fit space-y-6 p-5 dark:bg-ink-50">
           <Select label="Category" value={category} onChange={(e) => updateParam('category', e.target.value)}>
             <option value="">All categories</option>
             {categories.map((c) => (

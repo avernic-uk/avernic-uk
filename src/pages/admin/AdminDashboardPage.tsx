@@ -16,7 +16,7 @@ interface Stats {
 }
 
 export default function AdminDashboardPage() {
-  useDocumentMeta({ title: 'Admin dashboard' })
+  useDocumentMeta({ title: 'Admin dashboard', noindex: true })
   const [stats, setStats] = useState<Stats | null>(null)
   const [error, setError] = useState<string | null>(null)
 

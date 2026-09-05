@@ -1,33 +1,162 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Theme tokens.
+
+   Every Tailwind colour in tailwind.config.ts resolves to one of these
+   variables (as space-separated RGB so opacity modifiers still work).
+   `:root` is the LIGHT palette; `.dark` on <html> is the DARK palette.
+
+   The `ink` scale is semantic — ink-950 is always the strongest foreground,
+   ink-50 the faintest raised surface, `--surface` the page itself — so the
+   same component markup renders correctly in both themes. Dark values are
+   hand-picked (not a mathematical inversion): blue-black graphite grounds,
+   warmer, brighter brass so the accent still glows on a dark surface.
+   ========================================================================== */
 @layer base {
+  :root {
+    color-scheme: light;
+
+    --surface: 255 255 255;
+
+    --ink-50: 247 247 248;
+    --ink-100: 238 238 240;
+    --ink-200: 217 218 222;
+    --ink-300: 183 185 193;
+    --ink-400: 143 146 158;
+    --ink-500: 111 114 128;
+    --ink-600: 88 90 104;
+    --ink-700: 71 72 84;
+    --ink-800: 47 48 58;
+    --ink-900: 28 28 34;
+    --ink-950: 16 16 20;
+
+    --accent-50: 250 246 237;
+    --accent-100: 243 234 210;
+    --accent-200: 230 211 163;
+    --accent-300: 215 185 111;
+    --accent-400: 200 160 71;
+    --accent-500: 176 138 51;
+    --accent-600: 143 108 39;
+    --accent-700: 114 84 35;
+    --accent-800: 95 70 34;
+    --accent-900: 81 59 32;
+    --accent-950: 45 31 16;
+
+    --success-50: 240 250 244;
+    --success-500: 31 157 85;
+    --success-600: 27 132 72;
+    --success-700: 22 108 59;
+
+    --warning-50: 255 250 240;
+    --warning-500: 201 138 31;
+    --warning-600: 168 115 25;
+    --warning-700: 138 95 19;
+
+    --danger-50: 253 242 242;
+    --danger-500: 192 57 43;
+    --danger-600: 165 48 36;
+    --danger-700: 138 40 32;
+
+    --shadow-card: 0 1px 2px 0 rgb(16 16 20 / 0.04), 0 1px 3px 0 rgb(16 16 20 / 0.06);
+    --shadow-card-hover: 0 4px 12px -2px rgb(16 16 20 / 0.08), 0 2px 6px -2px rgb(16 16 20 / 0.06);
+    --shadow-popover: 0 12px 32px -8px rgb(16 16 20 / 0.18), 0 4px 12px -4px rgb(16 16 20 / 0.1);
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --surface: 11 11 16;
+
+    --ink-50: 18 18 26;
+    --ink-100: 26 26 36;
+    --ink-200: 38 38 52;
+    --ink-300: 55 55 73;
+    --ink-400: 108 110 128;
+    --ink-500: 141 143 160;
+    --ink-600: 172 174 187;
+    --ink-700: 198 200 210;
+    --ink-800: 223 224 231;
+    --ink-900: 238 238 243;
+    --ink-950: 250 250 252;
+
+    --accent-50: 27 23 14;
+    --accent-100: 42 35 17;
+    --accent-200: 63 52 24;
+    --accent-300: 143 108 39;
+    --accent-400: 200 160 71;
+    --accent-500: 207 166 77;
+    --accent-600: 220 189 114;
+    --accent-700: 230 211 163;
+    --accent-800: 237 220 177;
+    --accent-900: 243 234 210;
+    --accent-950: 250 246 237;
+
+    --success-50: 15 36 24;
+    --success-500: 52 196 111;
+    --success-600: 79 209 132;
+    --success-700: 126 224 164;
+
+    --warning-50: 42 31 11;
+    --warning-500: 224 163 58;
+    --warning-600: 234 180 90;
+    --warning-700: 242 203 133;
+
+    --danger-50: 44 18 18;
+    --danger-500: 226 91 77;
+    --danger-600: 236 123 111;
+    --danger-700: 244 161 152;
+
+    --shadow-card: inset 0 1px 0 0 rgb(255 255 255 / 0.03), 0 1px 2px 0 rgb(0 0 0 / 0.5);
+    --shadow-card-hover: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 12px 32px -12px rgb(0 0 0 / 0.7);
+    --shadow-popover: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 20px 48px -12px rgb(0 0 0 / 0.8);
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
+    background-color: rgb(var(--surface));
   }
 
   body {
     font-family: theme('fontFamily.sans');
+    background-color: rgb(var(--surface));
+    color: rgb(var(--ink-900));
   }
 
   h1, h2, h3, h4 {
     font-family: theme('fontFamily.display');
     font-weight: 600;
     letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Native form controls (date pickers, selects, scrollbars) follow the theme */
+  input, select, textarea {
+    color-scheme: inherit;
   }
 
   /* Visible, consistent focus ring across the site — never colour-only */
   :focus-visible {
-    outline: 2px solid theme('colors.accent.500');
+    outline: 2px solid rgb(var(--accent-500));
     outline-offset: 2px;
     border-radius: 4px;
   }
 
   ::selection {
-    background-color: theme('colors.accent.200');
+    background-color: rgb(var(--accent-200));
+    color: rgb(var(--ink-950));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -38,5 +167,46 @@
 
   .skip-link {
     @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-ink-900 focus:px-4 focus:py-2 focus:text-white;
+  }
+
+  /* Frosted, translucent surface used by the sticky header */
+  .glass {
+    background-color: rgb(var(--surface) / 0.72);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    backdrop-filter: saturate(160%) blur(18px);
+  }
+
+  /* A raised panel: page-adjacent surface, hairline border, theme-aware shadow */
+  .panel {
+    @apply rounded-2xl border border-ink-200/70 bg-white shadow-card;
+  }
+
+  /* Brass gradient text — used sparingly, for a single emphasised word */
+  .text-brass {
+    background-image: linear-gradient(
+      100deg,
+      rgb(var(--accent-600)) 0%,
+      rgb(var(--accent-300)) 45%,
+      rgb(var(--accent-600)) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Small uppercase label with a brass dot — section eyebrows */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-ink-500;
+  }
+  .eyebrow::before {
+    content: '';
+    @apply h-1.5 w-1.5 rounded-full bg-accent-500;
+  }
+
+  /* Hairline gradient rule — replaces flat borders between big sections */
+  .rule {
+    height: 1px;
+    background-image: linear-gradient(90deg, transparent, rgb(var(--ink-300) / 0.9) 30%, rgb(var(--ink-300) / 0.9) 70%, transparent);
   }
 }

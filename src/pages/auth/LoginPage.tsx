@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 
 export default function LoginPage() {
-  useDocumentMeta({ title: 'Log in' })
+  useDocumentMeta({ title: 'Log in', description: 'Log in to your Avernic UK account to view orders and saved details.', noindex: true })
   const { signInWithPassword } = useAuth()
   const navigate = useNavigate()
   const location = useLocation() as { state?: { from?: { pathname: string } } }

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 
 export default function RegisterPage() {
-  useDocumentMeta({ title: 'Create an account' })
+  useDocumentMeta({ title: 'Create an account', description: 'Create an Avernic UK account for faster checkout and order tracking.', noindex: true })
   const { signUp } = useAuth()
   const navigate = useNavigate()
 

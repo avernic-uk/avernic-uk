@@ -59,7 +59,7 @@ function poundsToMinor(value: string): number {
 }
 
 export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit' }) {
-  useDocumentMeta({ title: mode === 'create' ? 'New product — Admin' : 'Edit product — Admin' })
+  useDocumentMeta({ title: mode === 'create' ? 'New product — Admin' : 'Edit product — Admin', noindex: true })
   const navigate = useNavigate()
   const { id } = useParams()
   const [categories, setCategories] = useState<ProductCategory[]>([])

@@ -36,7 +36,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         aria-required={required || undefined}
         aria-invalid={Boolean(error) || undefined}
         aria-describedby={[hintId, errorId].filter(Boolean).join(' ') || undefined}
-        className={`h-11 w-full rounded-lg border bg-white px-3.5 text-sm text-ink-900 placeholder:text-ink-400 focus-visible:outline-2 focus-visible:outline-accent-500 ${
+        className={`h-11 w-full rounded-xl border bg-white px-3.5 text-sm text-ink-900 shadow-card transition-colors placeholder:text-ink-400 hover:border-ink-400 focus-visible:outline-2 focus-visible:outline-accent-500 dark:bg-ink-50 ${
           error ? 'border-danger-500' : 'border-ink-300'
         } ${className}`}
         {...rest}
@@ -80,7 +80,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         id={fieldId}
         required={required}
         aria-invalid={Boolean(error) || undefined}
-        className={`h-11 w-full rounded-lg border bg-white px-3.5 text-sm text-ink-900 focus-visible:outline-2 focus-visible:outline-accent-500 ${
+        className={`h-11 w-full rounded-xl border bg-white px-3.5 text-sm text-ink-900 shadow-card transition-colors hover:border-ink-400 focus-visible:outline-2 focus-visible:outline-accent-500 dark:bg-ink-50 ${
           error ? 'border-danger-500' : 'border-ink-300'
         } ${className}`}
         {...rest}
@@ -107,7 +107,7 @@ export function Checkbox({
         <input
           id={fieldId}
           type="checkbox"
-          className="mt-0.5 h-4 w-4 shrink-0 rounded border-ink-400 text-accent-600 focus-visible:outline-2 focus-visible:outline-accent-500"
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-ink-400 accent-accent-500 focus-visible:outline-2 focus-visible:outline-accent-500"
           aria-invalid={Boolean(error) || undefined}
           {...rest}
         />

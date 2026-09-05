@@ -20,7 +20,7 @@ interface ProductRow {
 }
 
 export default function AdminProductsPage() {
-  useDocumentMeta({ title: 'Products — Admin' })
+  useDocumentMeta({ title: 'Products — Admin', noindex: true })
   const [searchParams, setSearchParams] = useSearchParams()
   const search = searchParams.get('search') ?? ''
 

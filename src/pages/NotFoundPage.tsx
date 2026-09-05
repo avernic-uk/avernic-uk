@@ -2,7 +2,7 @@ import { ButtonLink } from '@/components/ui/Button'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
 
 export default function NotFoundPage() {
-  useDocumentMeta({ title: 'Page not found' })
+  useDocumentMeta({ title: 'Page not found', noindex: true })
   return (
     <div className="container-page py-24 text-center">
       <p className="text-sm font-medium text-accent-600">404</p>

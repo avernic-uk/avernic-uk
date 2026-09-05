@@ -26,7 +26,7 @@ interface OrderItemRow {
 }
 
 export default function AccountOrderDetailPage() {
-  useDocumentMeta({ title: 'Order details' })
+  useDocumentMeta({ title: 'Order details', noindex: true })
   const { id = '' } = useParams()
   const [order, setOrder] = useState<OrderDetail | null | undefined>(undefined)
   const [items, setItems] = useState<OrderItemRow[]>([])

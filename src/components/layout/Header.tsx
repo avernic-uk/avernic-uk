@@ -4,6 +4,7 @@ import { Logo } from './Logo'
 import { SearchBar } from './SearchBar'
 import { useBasket } from '@/lib/basket/BasketProvider'
 import { useAuth } from '@/lib/auth/AuthProvider'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const primaryNav = [
   { to: '/shop', label: 'Shop' },
@@ -14,8 +15,11 @@ const primaryNav = [
 ]
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
-  return `text-sm font-medium transition-colors ${
-    isActive ? 'text-ink-950' : 'text-ink-600 hover:text-ink-950'
+  // Active link carries a small brass underline; inactive ones reveal it on hover.
+  return `relative py-1 text-sm font-medium transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:bg-accent-500 after:transition-transform after:duration-300 ${
+    isActive
+      ? 'text-ink-950 after:scale-x-100'
+      : 'text-ink-600 after:scale-x-0 hover:text-ink-950 hover:after:scale-x-100'
   }`
 }
 
@@ -38,7 +42,7 @@ function BasketIcon({ count }: { count: number }) {
       {count > 0 && (
         <span
           aria-hidden="true"
-          className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-500 px-1 text-[11px] font-semibold text-ink-950"
+          className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-500 px-1 text-[11px] font-semibold text-literal-ink shadow-glow-sm"
         >
           {count > 99 ? '99+' : count}
         </span>
@@ -54,7 +58,7 @@ export function Header() {
   const { user } = useAuth()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink-200/70 bg-white/90 backdrop-blur">
+    <header className="glass sticky top-0 z-40 border-b border-ink-200/60">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
@@ -71,6 +75,7 @@ export function Header() {
 
         <div className="hidden items-center gap-3 md:flex">
           <SearchBar className="w-56 xl:w-72" />
+          <ThemeToggle />
           <Link
             to={user ? '/account' : '/login'}
             aria-label={user ? 'Your account' : 'Log in'}
@@ -85,6 +90,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
           <button
             aria-label="Search"
             onClick={() => setMobileSearchOpen((v) => !v)}
@@ -118,13 +124,13 @@ export function Header() {
       </div>
 
       {mobileSearchOpen && (
-        <div className="border-t border-ink-200 px-4 py-3 md:hidden">
+        <div className="border-t border-ink-200/70 px-4 py-3 md:hidden">
           <SearchBar autoFocus />
         </div>
       )}
 
       {mobileOpen && (
-        <nav aria-label="Mobile" className="border-t border-ink-200 lg:hidden">
+        <nav aria-label="Mobile" className="border-t border-ink-200/70 lg:hidden">
           <ul className="container-page flex flex-col py-2">
             {primaryNav.map((item) => (
               <li key={item.to}>

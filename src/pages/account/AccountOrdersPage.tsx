@@ -16,7 +16,7 @@ interface OrderRow {
 }
 
 export default function AccountOrdersPage() {
-  useDocumentMeta({ title: 'Your orders' })
+  useDocumentMeta({ title: 'Your orders', noindex: true })
   const [orders, setOrders] = useState<OrderRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 

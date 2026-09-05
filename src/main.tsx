@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { AuthProvider } from './lib/auth/AuthProvider'
 import { BasketProvider } from './lib/basket/BasketProvider'
+import { ThemeProvider } from './lib/theme/ThemeProvider'
 import './index.css'
 
 const rootEl = document.getElementById('root')
@@ -13,12 +14,14 @@ if (!rootEl) {
 
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <BasketProvider>
-          <App />
-        </BasketProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <BasketProvider>
+            <App />
+          </BasketProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>,
 )

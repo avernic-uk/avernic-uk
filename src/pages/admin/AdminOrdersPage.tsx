@@ -19,7 +19,7 @@ interface OrderRow {
 }
 
 export default function AdminOrdersPage() {
-  useDocumentMeta({ title: 'Orders — Admin' })
+  useDocumentMeta({ title: 'Orders — Admin', noindex: true })
   const [searchParams, setSearchParams] = useSearchParams()
   const search = searchParams.get('search') ?? ''
   const paymentStatus = searchParams.get('paymentStatus') ?? ''

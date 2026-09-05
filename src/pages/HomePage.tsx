@@ -66,17 +66,26 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="border-b border-ink-200 bg-gradient-to-b from-ink-50 to-white">
-        <div className="container-page grid items-center gap-10 py-16 lg:grid-cols-2 lg:gap-16 lg:py-24">
+      <section className="relative overflow-hidden border-b border-ink-200/60">
+        {/* Atmosphere: brass glow + faint grid, both purely decorative */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="absolute left-1/2 top-0 h-[42rem] w-[60rem] -translate-x-1/2 -translate-y-1/3 bg-hero-glow opacity-70 dark:opacity-100" />
+          <div
+            className="absolute inset-0 opacity-[0.35] [background-image:linear-gradient(rgb(var(--ink-300)/0.35)_1px,transparent_1px),linear-gradient(90deg,rgb(var(--ink-300)/0.35)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]"
+          />
+        </div>
+
+        <div className="container-page relative grid items-center gap-12 py-16 lg:grid-cols-[1.15fr_1fr] lg:gap-16 lg:py-28">
           <div className="animate-slide-up">
-            <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-ink-950 sm:text-5xl">
-              Healthcare, made simpler.
+            <span className="eyebrow">UK delivery · Open Banking checkout</span>
+            <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-ink-950 sm:text-5xl lg:text-6xl">
+              Healthcare, made <span className="text-brass animate-shimmer">simpler</span>.
             </h1>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-ink-600 sm:text-lg">
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-ink-600 sm:text-lg">
               Everyday healthcare and wellbeing essentials, chosen with care and delivered across
               the United Kingdom — with a straightforward checkout and secure Open Banking payment.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap gap-3">
               <ButtonLink to="/shop" variant="accent" size="lg">
                 Shop now
               </ButtonLink>
@@ -84,13 +93,26 @@ export default function HomePage() {
                 Learn more
               </ButtonLink>
             </div>
+            <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-ink-500">
+              {['No card details needed', 'Delivered across the UK', 'Secure bank-to-bank payment'].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-accent-500">
+                    <path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="relative flex items-center justify-center">
-            <div className="absolute inset-0 -z-10 rounded-full bg-accent-100/60 blur-3xl" aria-hidden="true" />
+
+          <div className="relative flex items-center justify-center py-8 lg:py-0">
+            <div aria-hidden="true" className="absolute h-72 w-72 rounded-full bg-accent-500/20 blur-3xl sm:h-96 sm:w-96" />
+            <div aria-hidden="true" className="absolute h-[22rem] w-[22rem] rounded-full border border-accent-500/15 sm:h-[28rem] sm:w-[28rem]" />
+            <div aria-hidden="true" className="absolute h-[16rem] w-[16rem] rounded-full border border-accent-500/25 sm:h-[20rem] sm:w-[20rem]" />
             <img
               src="/logo-icon.png"
               alt=""
-              className="h-64 w-auto drop-shadow-xl sm:h-80"
+              className="relative h-64 w-auto animate-float drop-shadow-[0_24px_40px_rgb(var(--accent-500)/0.35)] sm:h-80"
             />
           </div>
         </div>
@@ -108,10 +130,11 @@ export default function HomePage() {
       <section className="container-page py-16 sm:py-20">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-ink-950">Featured products</h2>
-            <p className="mt-1.5 text-sm text-ink-600">A selection of our most popular everyday essentials.</p>
+            <span className="eyebrow">Featured</span>
+            <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Everyday essentials</h2>
+            <p className="mt-1.5 text-sm text-ink-600">A selection of our most popular products.</p>
           </div>
-          <ButtonLink to="/shop" variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <ButtonLink to="/shop" variant="outline" size="sm" className="hidden sm:inline-flex">
             View all
           </ButtonLink>
         </div>
@@ -125,9 +148,10 @@ export default function HomePage() {
       </section>
 
       {/* Categories */}
-      <section className="border-y border-ink-200 bg-ink-50/60">
+      <section className="border-y border-ink-200/60 bg-ink-50/60 dark:bg-ink-50/40">
         <div className="container-page py-16 sm:py-20">
-          <h2 className="text-2xl font-semibold text-ink-950">Shop by category</h2>
+          <span className="eyebrow">Browse</span>
+          <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Shop by category</h2>
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {categories === null
               ? Array.from({ length: 3 }).map((_, i) => (
@@ -140,11 +164,15 @@ export default function HomePage() {
 
       {/* How it works */}
       <section className="container-page py-16 sm:py-20">
-        <h2 className="text-2xl font-semibold text-ink-950">How it works</h2>
-        <ol className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <span className="eyebrow">Simple by design</span>
+        <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">How it works</h2>
+        <ol className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, index) => (
-            <li key={step.title} className="rounded-2xl border border-ink-200/70 bg-white p-6 shadow-card">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink-900 text-sm font-semibold text-white">
+            <li
+              key={step.title}
+              className="relative rounded-2xl border border-ink-200/70 bg-white p-6 shadow-card transition-colors hover:border-accent-500/40 dark:bg-ink-50"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-gradient font-display text-sm font-semibold text-literal-ink shadow-glow-sm">
                 {index + 1}
               </span>
               <h3 className="mt-4 text-sm font-semibold text-ink-950">{step.title}</h3>
@@ -155,15 +183,16 @@ export default function HomePage() {
       </section>
 
       {/* FAQ */}
-      <section className="border-t border-ink-200 bg-ink-50/60">
+      <section className="border-t border-ink-200/60 bg-ink-50/60 dark:bg-ink-50/40">
         <div className="container-page max-w-3xl py-16 sm:py-20">
-          <h2 className="text-2xl font-semibold text-ink-950">Frequently asked questions</h2>
+          <span className="eyebrow">Help</span>
+          <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Frequently asked questions</h2>
           <div className="mt-8">
             <Accordion items={homeFaqs} />
           </div>
           <p className="mt-6 text-sm text-ink-600">
             Have another question?{' '}
-            <a href="/contact" className="font-medium text-ink-900 underline underline-offset-2">
+            <a href="/contact" className="font-medium text-accent-600 underline underline-offset-2 hover:text-accent-500">
               Contact us
             </a>
             .

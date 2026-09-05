@@ -1,29 +1,67 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang="en-GB" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Theme, before first paint: the site is dark by default; a visitor's
+      saved choice (see src/lib/theme/ThemeProvider.tsx) wins. Runs inline so
+      there is never a flash of the wrong theme while the React bundle loads.
+    -->
+    <script>
+      ;(function () {
+        try {
+          var t = localStorage.getItem('avernic-theme')
+          var dark = t !== 'light'
+          document.documentElement.classList.toggle('dark', dark)
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+        } catch (e) {}
+      })()
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0b10" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#101014" />
-    <title>Avernic UK — Healthcare, made simpler.</title>
+
+    <!--
+      SEO defaults. Every tag below carries data-seo so it can be found and
+      replaced in two places: per page in the browser (src/lib/useDocumentMeta.ts)
+      and, for crawlers and link previews that never run JavaScript, at the
+      edge before the HTML is served (functions/_middleware.ts).
+    -->
+    <title data-seo="title">Avernic UK — Healthcare, made simpler.</title>
     <meta
       name="description"
+      data-seo="description"
       content="Avernic UK: a modern, straightforward way to shop everyday healthcare and wellbeing essentials online, with UK delivery and secure Open Banking payment."
     />
-    <link rel="canonical" href="https://www.avernic.co.uk/" />
-    <meta property="og:type" content="website" />
+    <meta name="robots" data-seo="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" data-seo="canonical" href="https://www.avernic.co.uk/" />
+
+    <meta property="og:type" data-seo="og:type" content="website" />
     <meta property="og:site_name" content="Avernic UK" />
-    <meta property="og:title" content="Avernic UK — Healthcare, made simpler." />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:title" data-seo="og:title" content="Avernic UK — Healthcare, made simpler." />
     <meta
       property="og:description"
+      data-seo="og:description"
       content="Shop everyday healthcare and wellbeing essentials online. UK delivery. Secure Open Banking payment."
     />
-    <meta property="og:locale" content="en_GB" />
-    <meta property="og:image" content="/logo-lockup.png" />
+    <meta property="og:url" data-seo="og:url" content="https://www.avernic.co.uk/" />
+    <meta property="og:image" data-seo="og:image" content="https://www.avernic.co.uk/logo-lockup.png" />
+    <meta property="og:image:alt" content="Avernic UK" />
+
+    <meta name="twitter:card" data-seo="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" data-seo="twitter:title" content="Avernic UK — Healthcare, made simpler." />
+    <meta
+      name="twitter:description"
+      data-seo="twitter:description"
+      content="Shop everyday healthcare and wellbeing essentials online. UK delivery. Secure Open Banking payment."
+    />
+    <meta name="twitter:image" data-seo="twitter:image" content="https://www.avernic.co.uk/logo-lockup.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>

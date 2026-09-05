@@ -37,7 +37,7 @@ function statusTone(paymentStatus: string): 'success' | 'warning' | 'danger' | '
 }
 
 export default function OrderConfirmationPage() {
-  useDocumentMeta({ title: 'Order confirmation' })
+  useDocumentMeta({ title: 'Order confirmation', noindex: true })
   const { orderNumber = '' } = useParams()
   const [searchParams] = useSearchParams()
   const notice = searchParams.get('notice')

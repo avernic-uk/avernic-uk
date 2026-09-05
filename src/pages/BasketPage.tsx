@@ -7,7 +7,7 @@ import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
 
 export default function BasketPage() {
-  useDocumentMeta({ title: 'Your basket' })
+  useDocumentMeta({ title: 'Your basket', noindex: true })
   const { priced, pricing, pricingError, updateQuantity, removeItem, itemCount } = useBasket()
 
   if (itemCount === 0 && !pricing) {

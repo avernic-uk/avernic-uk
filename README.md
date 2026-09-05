@@ -13,6 +13,8 @@ email, and Fena Open Banking payment — see **Fena integration status** below.
 - [Fena integration status](#fena-integration-status)
 - [Resend email status](#resend-email-status)
 - [Project structure](#project-structure)
+- [Theme & dark mode](#theme--dark-mode)
+- [SEO](#seo)
 - [UK-only enforcement](#uk-only-enforcement)
 - [Security notes](#security-notes)
 - [Testing](#testing)
@@ -140,10 +142,14 @@ src/                      React app (Vite)
   lib/api/                Supabase-backed data access (products, categories)
   lib/auth/                AuthProvider, useIsAdmin
   lib/basket/              BasketProvider (client state; server always re-prices)
+  lib/theme/               ThemeProvider — dark by default, per-browser toggle (see Theme & dark mode)
+  lib/seo.ts, useDocumentMeta.ts, useJsonLd.ts   Per-page head tags + structured data (see SEO)
   lib/validation/          UK postcode validation
   pages/                    One file per route (see App.tsx for the full route tree)
 
 functions/                 Cloudflare Pages Functions (the API — file-based routing)
+  _middleware.ts            Edge SEO: fills title/OG/canonical/JSON-LD into the HTML shell per URL (see SEO)
+  _lib/seoMeta.ts           Static page map + product/category meta lookups for the middleware
   _lib/                     Shared server code: supabaseAdmin, auth, pricing, fena, paymentReconciliation, email, respond
   api/basket/price.ts       POST — server-authoritative basket pricing
   api/checkout/create-order.ts   POST — validates, re-prices, creates order, starts Fena payment
@@ -157,6 +163,28 @@ supabase/
   migrations/0001_init.sql   Full schema + RLS policies
   seed.sql                   Sample catalogue data
 ```
+
+## Theme & dark mode
+
+The site is **dark by default** with a sun/moon toggle in the header; the choice is remembered per browser (`localStorage["avernic-theme"]`). There is no flash of the wrong theme: a tiny inline script in `index.html` applies the saved theme before first paint, then `src/lib/theme/ThemeProvider.tsx` takes over.
+
+How it works, so the next change fits in:
+
+- Tailwind runs with `darkMode: 'class'`, and **every colour in `tailwind.config.ts` resolves to a CSS variable** declared in `src/index.css` (`:root` = light palette, `.dark` = dark palette).
+- The `ink` scale and `white` are **semantic, not literal**: `ink-950` is always the strongest foreground and `white` is always the page surface. So `bg-white text-ink-950` means "page surface, strongest text" in *both* themes — components don't need `dark:` variants for basic colours. Use `dark:` only for theme-specific flourishes (glows, glass).
+- Text that sits on a fixed-colour background (white on the red danger button, near-black on the brass accent) uses the theme-independent `literal-white` / `literal-ink` colours.
+- Palette: blue-black graphite grounds (`#0b0b10` page, `#12121a` raised) with a warmer, brighter brass accent in dark mode so it still glows. Light mode is the original slate/ochre palette.
+
+## SEO
+
+Two layers, sharing one set of `data-seo="…"`-tagged elements declared in `index.html`:
+
+1. **In the browser** — `useDocumentMeta({ title, description, path?, image?, type?, noindex? })` sets `<title>`, description, robots, canonical, Open Graph and Twitter tags on every route; `useJsonLd` adds structured data. The site graph (Organization/OnlineStore + WebSite with a search action) is emitted from `Layout.tsx`; product pages emit `Product` + `BreadcrumbList`. Basket, checkout, account, auth and admin pages are `noindex`. `/shop` declares one canonical URL for every filter/search combination.
+2. **At the edge** — `functions/_middleware.ts` runs on every HTML page request and, via `HTMLRewriter`, replaces the same tags *server-side* before the shell is served, looking product/category details up in Supabase (with a short Cache API TTL). This is what social link previews and non-JS crawlers see, so a shared product link shows the product's name, description and image rather than the homepage's. Unknown product/category slugs and unknown routes are served with a real **404 status** (the React 404 page still renders) so they aren't indexed as soft-404s. `/api/*`, `sitemap.xml`, `robots.txt` and anything with a file extension pass straight through.
+
+Also: dynamic `sitemap.xml` from the live catalogue, `robots.txt` excluding private/transactional paths and search-result URLs, absolute `og:image` URLs, `max-image-preview:large`.
+
+`SITE_URL` (server) / `VITE_SITE_URL` (browser) should be the site's real public origin — canonical and `og:url` tags are built from them (falling back to the request origin when unset). Once a custom domain is live, set both to it and keep `robots.txt`'s `Sitemap:` line in step.
 
 ## UK-only enforcement
 

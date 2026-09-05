@@ -32,7 +32,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       <button
         aria-label="Close dialog"
-        className="absolute inset-0 bg-ink-950/50"
+        className="absolute inset-0 bg-literal-ink/60 backdrop-blur-sm"
         onClick={onClose}
       />
       <div
@@ -41,7 +41,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         aria-modal="true"
         aria-labelledby="modal-title"
         tabIndex={-1}
-        className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-popover animate-slide-up"
+        className="relative z-10 w-full max-w-md rounded-2xl border border-ink-200/70 bg-white p-6 shadow-popover dark:bg-ink-50 animate-slide-up"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <h2 id="modal-title" className="text-lg font-semibold text-ink-900">

@@ -34,7 +34,7 @@ const initialState: FormState = {
 }
 
 export default function CheckoutPage() {
-  useDocumentMeta({ title: 'Checkout' })
+  useDocumentMeta({ title: 'Checkout', noindex: true })
   const { priced, lines, clear } = useBasket()
   const { user } = useAuth()
   const navigate = useNavigate()

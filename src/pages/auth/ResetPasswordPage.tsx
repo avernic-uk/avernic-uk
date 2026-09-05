@@ -11,7 +11,7 @@ import { Alert } from '@/components/ui/Alert'
  * with a recovery token already exchanged into a session by the client SDK).
  */
 export default function ResetPasswordPage() {
-  useDocumentMeta({ title: 'Set a new password' })
+  useDocumentMeta({ title: 'Set a new password', noindex: true })
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)

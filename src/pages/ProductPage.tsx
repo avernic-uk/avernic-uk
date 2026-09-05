@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { formatGBP } from '@/lib/format'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { useJsonLd } from '@/lib/useJsonLd'
+import { absoluteUrl, SITE_NAME } from '@/lib/seo'
 import { getProductBySlug, getRelatedProducts } from '@/lib/api/products'
 import { useBasket } from '@/lib/basket/BasketProvider'
 import { Badge } from '@/components/ui/Badge'
@@ -24,29 +25,59 @@ export default function ProductPage() {
   useDocumentMeta({
     title: product ? product.name : 'Product',
     description: product?.shortDescription,
+    image: product?.imageUrl,
+    type: 'product',
   })
 
   // Product structured data — describes only what's actually on the page
   // (name, price, availability). No clinical/medical claims are asserted.
-  useJsonLd(
-    product
-      ? {
+  // Bundled with a BreadcrumbList so search results can show the category
+  // trail. The edge middleware emits the same shape for crawlers.
+  const productJsonLd = useMemo(
+    () =>
+      product
+        ? {
           '@context': 'https://schema.org',
-          '@type': 'Product',
-          name: product.name,
-          description: product.shortDescription,
-          sku: product.sku,
-          image: product.imageUrl,
-          offers: {
-            '@type': 'Offer',
-            priceCurrency: 'GBP',
-            price: (product.priceMinor / 100).toFixed(2),
-            availability: product.stockQuantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-            areaServed: 'GB',
-          },
+          '@graph': [
+            {
+              '@type': 'Product',
+              '@id': absoluteUrl(`/product/${product.slug}`) + '#product',
+              name: product.name,
+              description: product.shortDescription,
+              sku: product.sku,
+              image: [product.imageUrl, ...product.additionalImages.map((i) => i.url)].filter(Boolean),
+              url: absoluteUrl(`/product/${product.slug}`),
+              brand: { '@type': 'Brand', name: SITE_NAME },
+              offers: {
+                '@type': 'Offer',
+                url: absoluteUrl(`/product/${product.slug}`),
+                priceCurrency: 'GBP',
+                price: (product.priceMinor / 100).toFixed(2),
+                availability: product.stockQuantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                itemCondition: 'https://schema.org/NewCondition',
+                areaServed: 'GB',
+                seller: { '@type': 'Organization', name: SITE_NAME },
+              },
+            },
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Shop', item: absoluteUrl('/shop') },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: product.categorySlug,
+                  item: absoluteUrl(`/shop/${product.categorySlug}`),
+                },
+                { '@type': 'ListItem', position: 3, name: product.name },
+              ],
+            },
+          ],
         }
-      : null,
+        : null,
+    [product],
   )
+  useJsonLd(productJsonLd)
 
   useEffect(() => {
     let cancelled = false

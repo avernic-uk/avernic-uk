@@ -1,42 +1,49 @@
 import type { Config } from 'tailwindcss'
 
+// ============================================================================
 // Avernic UK design system tokens.
-// A sophisticated, muted slate/graphite palette with a single warm accent
-// (ochre/brass, echoing the trident mark) — deliberately NOT "pharmacy green".
+//
+// A sophisticated graphite palette with a single warm accent (ochre/brass,
+// echoing the trident mark) — deliberately NOT "pharmacy green".
+//
+// THEMING: every colour below resolves to a CSS custom property declared in
+// src/index.css, where `:root` holds the light palette and `.dark` (set on
+// <html> by src/lib/theme/ThemeProvider.tsx, and by the no-flash script in
+// index.html) holds the dark one. The `ink` scale is *semantic*, not literal:
+// ink-950 is always "the strongest foreground" and `white` is always "the page
+// surface", so in dark mode the scale is remapped rather than the components
+// being rewritten. `bg-white text-ink-950` therefore means "page surface,
+// strongest text" in both themes. Use `dark:` variants only for genuinely
+// theme-specific flourishes (glows, glass), never for basic colours.
+//
+// The `<alpha-value>` form keeps opacity modifiers working (border-ink-200/70).
+// ============================================================================
+
+function v(name: string) {
+  return `rgb(var(--${name}) / <alpha-value>)`
+}
+
+function scale(prefix: string, steps: number[]) {
+  return Object.fromEntries(steps.map((s) => [s, v(`${prefix}-${s}`)]))
+}
+
+const full = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        ink: {
-          50: '#f7f7f8',
-          100: '#eeeef0',
-          200: '#d9dade',
-          300: '#b7b9c1',
-          400: '#8f929e',
-          500: '#6f7280',
-          600: '#585a68',
-          700: '#474854',
-          800: '#2f303a',
-          900: '#1c1c22',
-          950: '#101014',
-        },
-        accent: {
-          50: '#faf6ed',
-          100: '#f3ead2',
-          200: '#e6d3a3',
-          300: '#d7b96f',
-          400: '#c8a047',
-          500: '#b08a33',
-          600: '#8f6c27',
-          700: '#725423',
-          800: '#5f4622',
-          900: '#513b20',
-          950: '#2d1f10',
-        },
-        success: { 50: '#f0faf4', 500: '#1f9d55', 700: '#166c3b' },
-        warning: { 50: '#fffaf0', 500: '#c98a1f', 700: '#8a5f13' },
-        danger: { 50: '#fdf2f2', 500: '#c0392b', 700: '#8a2820' },
+        white: v('surface'),
+        ink: scale('ink', full),
+        accent: scale('accent', full),
+        success: scale('success', [50, 500, 600, 700]),
+        warning: scale('warning', [50, 500, 600, 700]),
+        danger: scale('danger', [50, 500, 600, 700]),
+        // Theme-INDEPENDENT literals, for text sitting on a fixed-colour
+        // background (white on a red danger button, near-black on brass).
+        literal: { white: '#ffffff', ink: '#101014' },
       },
       fontFamily: {
         sans: [
@@ -50,17 +57,14 @@ export default {
           'Arial',
           'sans-serif',
         ],
-        display: [
-          '"Fraunces"',
-          '"Inter var"',
-          'Georgia',
-          'serif',
-        ],
+        display: ['"Fraunces"', '"Inter var"', 'Georgia', 'serif'],
       },
       boxShadow: {
-        card: '0 1px 2px 0 rgb(16 16 20 / 0.04), 0 1px 3px 0 rgb(16 16 20 / 0.06)',
-        'card-hover': '0 4px 12px -2px rgb(16 16 20 / 0.08), 0 2px 6px -2px rgb(16 16 20 / 0.06)',
-        popover: '0 12px 32px -8px rgb(16 16 20 / 0.18), 0 4px 12px -4px rgb(16 16 20 / 0.1)',
+        card: 'var(--shadow-card)',
+        'card-hover': 'var(--shadow-card-hover)',
+        popover: 'var(--shadow-popover)',
+        glow: '0 0 0 1px rgb(var(--accent-500) / 0.35), 0 8px 32px -8px rgb(var(--accent-500) / 0.45)',
+        'glow-sm': '0 0 0 1px rgb(var(--accent-500) / 0.25), 0 4px 16px -4px rgb(var(--accent-500) / 0.35)',
       },
       borderRadius: {
         xl2: '1.25rem',
@@ -68,13 +72,29 @@ export default {
       maxWidth: {
         content: '80rem',
       },
+      backgroundImage: {
+        'accent-gradient':
+          'linear-gradient(135deg, rgb(var(--accent-300)) 0%, rgb(var(--accent-500)) 55%, rgb(var(--accent-600)) 100%)',
+        'hero-glow':
+          'radial-gradient(60% 60% at 50% 40%, rgb(var(--accent-500) / 0.28) 0%, rgb(var(--accent-500) / 0) 70%)',
+      },
       keyframes: {
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
         'slide-up': { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '200% 50%' },
+          '100%': { backgroundPosition: '-200% 50%' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.4s ease-out',
-        'slide-up': 'slide-up 0.4s ease-out',
+        'slide-up': 'slide-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        float: 'float 7s ease-in-out infinite',
+        shimmer: 'shimmer 6s linear infinite',
       },
     },
   },

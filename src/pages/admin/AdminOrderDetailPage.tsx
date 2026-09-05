@@ -43,7 +43,7 @@ interface Payment {
 const ORDER_STATUSES = ['pending_payment', 'paid', 'processing', 'dispatched', 'completed', 'cancelled', 'refunded']
 
 export default function AdminOrderDetailPage() {
-  useDocumentMeta({ title: 'Order — Admin' })
+  useDocumentMeta({ title: 'Order — Admin', noindex: true })
   const { id = '' } = useParams()
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [items, setItems] = useState<OrderItem[]>([])
