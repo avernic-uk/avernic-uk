@@ -17,9 +17,9 @@ import type { Env } from './types'
 // ============================================================================
 
 export const SITE_NAME = 'Avernic UK'
-const DEFAULT_TITLE = 'Avernic UK — Healthcare, made simpler.'
+const DEFAULT_TITLE = 'Avernic UK — Peptide skincare, made simpler.'
 const DEFAULT_DESCRIPTION =
-  'Avernic UK: a modern, straightforward way to shop everyday healthcare and wellbeing essentials online, with UK delivery and secure Open Banking payment.'
+  'Avernic UK: cosmetic peptide skincare — serums, moisturisers and treatments — delivered across the UK with secure Open Banking payment. Skincare only; not medicines. 18+.'
 const DEFAULT_IMAGE_PATH = '/logo-lockup.png'
 
 export interface PageMeta {
@@ -47,12 +47,12 @@ const STATIC_PAGES: Record<string, StaticPage> = {
   '/': { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
   '/shop': {
     title: 'Shop',
-    description: 'Browse the full Avernic UK range of everyday healthcare and wellbeing essentials.',
+    description: 'Browse the full Avernic UK range of cosmetic peptide skincare.',
   },
   '/shop/categories': { title: 'Categories', description: 'Browse the Avernic UK range by category.' },
   '/about': {
     title: 'About Avernic UK',
-    description: 'Learn about Avernic UK, a UK-based online retailer of everyday healthcare and wellbeing essentials.',
+    description: 'Learn about Avernic UK, a UK-based online retailer of cosmetic peptide skincare.',
   },
   '/faq': {
     title: 'Frequently asked questions',

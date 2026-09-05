@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Header } from './Header'
 import { Footer } from './Footer'
+import { AgeNotice } from './AgeNotice'
 import { useJsonLd } from '@/lib/useJsonLd'
 import { useMemo } from 'react'
 import { absoluteUrl, siteUrl, SITE_NAME } from '@/lib/seo'
@@ -44,6 +45,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
+      <AgeNotice />
       <Header />
       <main id="main-content" className="flex-1">
         {children}

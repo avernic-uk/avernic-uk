@@ -1,8 +1,8 @@
 # Avernic UK
 
-A UK-only e-commerce website for Avernic UK: React + TypeScript + Vite + Tailwind CSS frontend,
-Cloudflare Pages Functions backend, Supabase (Postgres + Auth) database, Resend transactional
-email, and Fena Open Banking payment — see **Fena integration status** below.
+A UK-only e-commerce website for Avernic UK, selling cosmetic peptide skincare (serums, moisturisers, eye care, cleansers, treatments — topical products only, not medicines or injectables): React + TypeScript + Vite + Tailwind CSS frontend, Cloudflare Pages Functions backend, Supabase (Postgres + Auth) database, Resend transactional email, and Fena Open Banking payment — see **Fena integration status** below.
+
+**Product scope, deliberately:** only topical cosmetic peptide skincare. Injectable/"research" peptides (BPC-157, TB-500, Melanotan, GLP-1 analogues such as semaglutide/tirzepatide/retatrutide, etc.) are unlicensed medicinal products in the UK — selling them to consumers breaches the Human Medicines Regulations 2012 regardless of "research use only"/18+ labelling. Two such products were added to the live catalogue and removed once flagged; don't re-add anything in that category. A site-wide 18+ notice (`src/components/layout/AgeNotice.tsx`) is shown as a general caution, not because these products are legally age-restricted.
 
 ## Contents
 
@@ -277,7 +277,4 @@ This is **not** production-ready as-is. Outstanding, in priority order:
 6. **Supabase project, Resend domain verification, Cloudflare Pages project** all need to be
    created and connected end-to-end, then the full checkout → payment → webhook → email chain
    needs to be tested against them for real.
-7. **Any pharmacy/prescription eligibility workflow**, if Avernic UK sells products that require
-   one — the architecture supports adding it (e.g. a per-product `metadata` flag + a checkout-time
-   eligibility step) but no such workflow exists yet, per the brief's instruction not to fabricate
-   compliance.
+7. **Stay within the product scope above.** If the business wants to expand beyond topical cosmetic skincare (injectables, ingestibles, anything making a medical claim), that needs a UK healthcare regulatory lawyer's input before it's added to this codebase — not just a new product row.

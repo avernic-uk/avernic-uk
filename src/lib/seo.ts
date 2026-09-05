@@ -1,7 +1,7 @@
 export const SITE_NAME = 'Avernic UK'
-export const DEFAULT_TITLE = 'Avernic UK — Healthcare, made simpler.'
+export const DEFAULT_TITLE = 'Avernic UK — Peptide skincare, made simpler.'
 export const DEFAULT_DESCRIPTION =
-  'Avernic UK: a modern, straightforward way to shop everyday healthcare and wellbeing essentials online, with UK delivery and secure Open Banking payment.'
+  'Avernic UK: cosmetic peptide skincare — serums, moisturisers and treatments — delivered across the UK with secure Open Banking payment. Skincare only; not medicines. 18+.'
 export const DEFAULT_OG_IMAGE_PATH = '/logo-lockup.png'
 
 /**

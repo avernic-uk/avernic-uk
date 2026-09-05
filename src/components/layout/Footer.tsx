@@ -42,7 +42,7 @@ export function Footer() {
             </span>
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-600">
-            Everyday healthcare and wellbeing essentials, delivered across the United Kingdom.
+            Cosmetic peptide skincare, delivered across the United Kingdom. For adults 18+.
           </p>
         </div>
 
@@ -67,10 +67,11 @@ export function Footer() {
           <p>© {new Date().getFullYear()} Avernic UK. All rights reserved.</p>
           <p className="max-w-2xl">
             Avernic UK is a UK-based online retailer. [Company name and registration number to be
-            supplied]. Registered office: [registered address to be supplied]. Avernic UK is not a
-            registered pharmacy; where a product page states otherwise, that is the accurate,
-            supplied status for that product only. Prices shown in pounds sterling (GBP), inclusive
-            of VAT where applicable. Delivery to UK addresses only.
+            supplied]. Registered office: [registered address to be supplied]. All products sold on
+            Avernic UK are cosmetic skincare products intended for topical use only and are not
+            medicines. Our products are intended for adults aged 18 and over. Prices shown in
+            pounds sterling (GBP), inclusive of VAT where applicable. Delivery to UK addresses
+            only.
           </p>
         </div>
       </div>

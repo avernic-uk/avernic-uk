@@ -11,6 +11,10 @@ import type { Product, ProductCategory } from '@/types'
 
 const homeFaqs = [
   {
+    question: 'Are these medical products?',
+    answer: 'No — everything we sell is a cosmetic skincare product applied topically. Nothing on Avernic UK is a medicine and nothing is intended for injection or internal use.',
+  },
+  {
     question: 'Where do you deliver?',
     answer: 'Avernic UK delivers to addresses within the United Kingdom only. We do not currently offer international shipping.',
   },
@@ -37,9 +41,9 @@ const steps = [
 
 export default function HomePage() {
   useDocumentMeta({
-    title: 'Healthcare, made simpler',
+    title: 'Peptide skincare, made simpler',
     description:
-      'Shop everyday healthcare and wellbeing essentials online at Avernic UK. UK delivery, secure Open Banking payment.',
+      'Shop peptide serums, moisturisers and treatments online at Avernic UK. Cosmetic skincare only, UK delivery, secure Open Banking payment. 18+.',
   })
 
   const [featured, setFeatured] = useState<Product[] | null>(null)
@@ -79,11 +83,12 @@ export default function HomePage() {
           <div className="animate-slide-up">
             <span className="eyebrow">UK delivery · Open Banking checkout</span>
             <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-ink-950 sm:text-5xl lg:text-6xl">
-              Healthcare, made <span className="text-brass animate-shimmer">simpler</span>.
+              Peptide skincare, made <span className="text-brass animate-shimmer">simpler</span>.
             </h1>
             <p className="mt-6 max-w-lg text-base leading-relaxed text-ink-600 sm:text-lg">
-              Everyday healthcare and wellbeing essentials, chosen with care and delivered across
-              the United Kingdom — with a straightforward checkout and secure Open Banking payment.
+              Cosmetic peptide serums, moisturisers and treatments, chosen with care and delivered
+              across the United Kingdom — with a straightforward checkout and secure Open Banking
+              payment.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <ButtonLink to="/shop" variant="accent" size="lg">
@@ -94,7 +99,7 @@ export default function HomePage() {
               </ButtonLink>
             </div>
             <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-ink-500">
-              {['No card details needed', 'Delivered across the UK', 'Secure bank-to-bank payment'].map((item) => (
+              {['Cosmetic skincare only — 18+', 'Delivered across the UK', 'Secure bank-to-bank payment'].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-accent-500">
                     <path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -131,8 +136,8 @@ export default function HomePage() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <span className="eyebrow">Featured</span>
-            <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Everyday essentials</h2>
-            <p className="mt-1.5 text-sm text-ink-600">A selection of our most popular products.</p>
+            <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Best-selling peptides</h2>
+            <p className="mt-1.5 text-sm text-ink-600">A selection of our most popular peptide skincare products.</p>
           </div>
           <ButtonLink to="/shop" variant="outline" size="sm" className="hidden sm:inline-flex">
             View all

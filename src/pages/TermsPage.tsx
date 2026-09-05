@@ -50,9 +50,12 @@ export default function TermsPage() {
 
       <h2 className="text-lg font-semibold text-ink-900">7. Product information</h2>
       <p>
-        We do not make medical claims about our products beyond what is stated in the product's
-        official packaging and patient information. Nothing on this website constitutes medical
-        advice; if in doubt, consult a healthcare professional.
+        All products sold on this website are cosmetic skincare products intended for topical use
+        only. They are not medicines and are not intended to diagnose, treat, cure or prevent any
+        disease. We do not make medical claims about our products beyond what is stated on the
+        product's official packaging. Nothing on this website constitutes medical advice; if in
+        doubt, consult a healthcare professional. Our products are intended for adults aged 18 and
+        over.
       </p>
 
       <h2 className="text-lg font-semibold text-ink-900">8. Liability</h2>

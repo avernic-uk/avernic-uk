@@ -14,7 +14,7 @@ const PAGE_SIZE = 12
 export default function ShopPage() {
   useDocumentMeta({
     title: 'Shop',
-    description: 'Browse the full Avernic UK range of everyday healthcare and wellbeing essentials.',
+    description: 'Browse the full Avernic UK range of cosmetic peptide skincare.',
     path: '/shop', // one canonical URL for every filter/search/page combination
   })
 
@@ -83,7 +83,7 @@ export default function ShopPage() {
               Showing results for <span className="font-medium text-ink-900">“{q}”</span>
             </>
           ) : (
-            'Browse our full range of everyday healthcare and wellbeing essentials.'
+            'Browse our full range of cosmetic peptide skincare.'
           )}
         </p>
       </div>

@@ -7,7 +7,7 @@ export default function ReturnsPage() {
       <p>
         Under the Consumer Contracts Regulations, you generally have the right to cancel an order
         within 14 days of receiving it, without giving a reason.{' '}
-        <Placeholder>Confirm exact policy — some healthcare products may be exempt from return
+        <Placeholder>Confirm exact policy — some skincare products may be exempt from return
         once opened for hygiene/safety reasons; confirm and list any exceptions here.</Placeholder>
       </p>
 
