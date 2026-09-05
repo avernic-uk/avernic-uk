@@ -29,6 +29,8 @@ function mapStatus(status: NormalisedFenaStatus): { paymentStatus: PaymentStatus
       return { paymentStatus: 'failed', orderStatus: null }
     case 'cancelled':
       return { paymentStatus: 'cancelled', orderStatus: 'cancelled' }
+    case 'refunded':
+      return { paymentStatus: 'refunded', orderStatus: 'refunded' }
     case 'expired':
       return { paymentStatus: 'failed', orderStatus: null }
     case 'unknown':

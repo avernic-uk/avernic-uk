@@ -165,29 +165,37 @@ export async function createFenaPayment(env: Env, req: CreateFenaPaymentRequest)
   return { paymentId, hashedId, redirectUrl: link, raw }
 }
 
-export type NormalisedFenaStatus = 'processing' | 'paid' | 'failed' | 'cancelled' | 'expired' | 'unknown'
+export type NormalisedFenaStatus = 'processing' | 'paid' | 'failed' | 'cancelled' | 'refunded' | 'expired' | 'unknown'
 
-function normaliseFenaStatus(status: unknown): NormalisedFenaStatus {
-  switch (String(status ?? '').toLowerCase()) {
-    case 'paid':
-    case 'completed':
-    case 'success':
-      return 'paid'
+/**
+ * A real live test call (see git history / conversation) confirmed the
+ * status payload shape: alongside a free-text `status` string (only "sent"
+ * has actually been observed, for an unpaid payment), Fena exposes explicit
+ * boolean/timestamp fields — `isFullyPaid`, `isRefunded`, `rejectedAt` — that
+ * are far more reliable than guessing every string `status` can take across
+ * a payment's lifecycle. Those booleans are checked FIRST; the `status`
+ * string is only a fallback for the one value actually observed live.
+ * Anything not positively recognised maps to 'unknown', which callers must
+ * treat as "no change" — never as a failure — so an unanticipated but real
+ * status can never be misread as a failed or paid payment.
+ */
+function normaliseFenaStatus(data: Record<string, unknown>): NormalisedFenaStatus {
+  if (data.isRefunded === true) return 'refunded'
+  if (data.rejectedAt) return 'failed'
+  if (data.isFullyPaid === true) return 'paid'
+
+  switch (String(data.status ?? '').toLowerCase()) {
+    case 'sent': // confirmed live: the initial "awaiting the customer" state
     case 'pending':
     case 'processing':
-    case 'sent':
+    case 'partially_paid':
       return 'processing'
-    case 'failed':
-    case 'rejected':
-    case 'declined':
-      return 'failed'
     case 'cancelled':
     case 'canceled':
       return 'cancelled'
     case 'expired':
       return 'expired'
     default:
-      // Deliberately not treated as failure — see file header.
       return 'unknown'
   }
 }
@@ -213,5 +221,5 @@ export async function checkFenaPaymentStatus(env: Env, hashedId: string): Promis
     throw new Error(`Fena payment status check failed (${res.status}): ${JSON.stringify(raw)}`)
   }
   const data = (raw as { data?: Record<string, unknown> }).data
-  return { status: normaliseFenaStatus(data?.status), raw }
+  return { status: normaliseFenaStatus(data ?? {}), raw }
 }
