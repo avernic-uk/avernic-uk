@@ -11,6 +11,7 @@ interface FaqRow {
   id: string
   question: string
   answer: string
+  category: string | null
   sort_order: number
   is_active: boolean
 }
@@ -23,6 +24,7 @@ export default function AdminFaqsPage() {
   const [error, setError] = useState<string | null>(null)
   const [newQuestion, setNewQuestion] = useState('')
   const [newAnswer, setNewAnswer] = useState('')
+  const [newCategory, setNewCategory] = useState('')
   const [adding, setAdding] = useState(false)
 
   function load() {
@@ -41,10 +43,11 @@ export default function AdminFaqsPage() {
     try {
       await adminFetchJson('/api/admin/faqs', {
         method: 'POST',
-        body: JSON.stringify({ question: newQuestion.trim(), answer: newAnswer.trim() }),
+        body: JSON.stringify({ question: newQuestion.trim(), answer: newAnswer.trim(), category: newCategory.trim() }),
       })
       setNewQuestion('')
       setNewAnswer('')
+    setNewCategory('')
       load()
       refresh()
     } catch (err) {
@@ -54,7 +57,7 @@ export default function AdminFaqsPage() {
     }
   }
 
-  async function updateFaq(id: string, patch: Partial<{ question: string; answer: string; isActive: boolean; sortOrder: number }>) {
+  async function updateFaq(id: string, patch: Partial<{ question: string; answer: string; category: string; isActive: boolean; sortOrder: number }>) {
     try {
       await adminFetchJson(`/api/admin/faqs/${id}`, { method: 'PATCH', body: JSON.stringify(patch) })
       load()
@@ -89,7 +92,7 @@ export default function AdminFaqsPage() {
     <div className="max-w-3xl">
       <h1 className="text-2xl font-semibold text-ink-950">FAQs</h1>
       <p className="mt-1 text-sm text-ink-500">
-        Shown on the homepage and as “General questions” on the FAQ page. Inactive entries are hidden from the site.
+        Every question on the FAQ page, plus the ones shown on the homepage. Give entries a section heading to group them; leave it blank and they appear under “General questions”. Inactive entries are hidden from the site.
       </p>
 
       {error && (
@@ -119,6 +122,14 @@ export default function AdminFaqsPage() {
                     className="w-full rounded-lg border border-ink-300 p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent-500"
                   />
                 </div>
+                <Input
+                  label="Section heading (optional)"
+                  value={faq.category ?? ''}
+                  placeholder="e.g. Delivery"
+                  hint="Groups this question under a heading on the FAQ page. Leave blank for “General questions”."
+                  onChange={(e) => setFaqs((prev) => prev!.map((f) => (f.id === faq.id ? { ...f, category: e.target.value } : f)))}
+                  onBlur={(e) => updateFaq(faq.id, { category: e.target.value })}
+                />
               </div>
               <div className="flex shrink-0 flex-col items-end gap-2">
                 <Badge tone={faq.is_active ? 'success' : 'neutral'}>{faq.is_active ? 'Visible' : 'Hidden'}</Badge>
@@ -155,6 +166,13 @@ export default function AdminFaqsPage() {
             className="w-full rounded-lg border border-ink-300 p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent-500"
           />
         </div>
+        <Input
+          label="Section heading (optional)"
+          value={newCategory}
+          placeholder="e.g. Delivery"
+          onChange={(e) => setNewCategory(e.target.value)}
+          hint="Leave blank to file it under “General questions”."
+        />
         <Button type="submit" variant="accent" loading={adding}>
           Add FAQ
         </Button>

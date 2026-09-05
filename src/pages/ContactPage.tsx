@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { InfoPageLayout, Placeholder } from '@/components/layout/InfoPageLayout'
+import { InfoPageLayout } from '@/components/layout/InfoPageLayout'
+import { ContentBlock } from '@/lib/content/ContentBlocks'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
@@ -41,13 +42,7 @@ export default function ContactPage() {
 
   return (
     <InfoPageLayout title="Contact us" description="Get in touch with Avernic UK.">
-      <p>
-        Registered business address: <Placeholder>registered business address</Placeholder>
-        <br />
-        Customer service email: <Placeholder>customer service email</Placeholder>
-        <br />
-        Customer service telephone: <Placeholder>customer service telephone number</Placeholder>
-      </p>
+      <ContentBlock blockKey="contact.details" />
 
       {status === 'sent' ? (
         <Alert tone="success" title="Message sent">

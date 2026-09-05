@@ -9,6 +9,7 @@ import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { useFaqJsonLd } from '@/lib/useFaqJsonLd'
 import { getFeaturedProducts, getCategories } from '@/lib/api/products'
 import { formatGBP } from '@/lib/format'
+import { ContentBlock } from '@/lib/content/ContentBlocks'
 import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 import type { Product, ProductCategory } from '@/types'
 
@@ -272,39 +273,9 @@ export default function HomePage() {
             </ButtonLink>
           </div>
 
-          <dl className="space-y-8">
-            <div>
-              <dt className="font-display text-base font-semibold text-ink-950">What is a peptide?</dt>
-              <dd className="mt-2 text-sm leading-relaxed text-ink-600">
-                A peptide is a short chain of amino acids — the same building blocks that make up proteins, just far
-                fewer of them. Collagen and elastin, the proteins that give skin its structure, are themselves built
-                from amino acids. Cosmetic peptides are short synthetic or hydrolysed chains chosen because they are
-                small enough to be formulated into a stable, well-tolerated skincare product.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-display text-base font-semibold text-ink-950">What do they do in skincare?</dt>
-              <dd className="mt-2 text-sm leading-relaxed text-ink-600">
-                Applied topically, peptides are used in cosmetic formulations to support the appearance of firmness,
-                smoothness and evenness — the look of the skin surface. Different peptides are chosen for different
-                cosmetic purposes: signal peptides such as Matrixyl 3000 for the look of firmness, Argireline and
-                Snap-8 for the appearance of expression lines, copper peptides for overall tone and texture. Results
-                are gradual and appearance-based; most formulations are used daily over several weeks.
-              </dd>
-            </div>
-            <div>
-              <dt className="font-display text-base font-semibold text-ink-950">
-                Are these the same as injectable peptides?
-              </dt>
-              <dd className="mt-2 text-sm leading-relaxed text-ink-600">
-                No — and this is the distinction that matters most. Everything Avernic UK sells is a cosmetic skincare
-                product applied to the surface of the skin. We do not sell, and will not sell, injectable peptides,
-                research peptides, or any peptide product intended for internal use. Those are an entirely separate
-                category, they are not cosmetics, and they are not something a skincare retailer should be supplying.
-                If that is what you are looking for, this is not the right shop.
-              </dd>
-            </div>
-          </dl>
+          <div className="space-y-5">
+            <ContentBlock blockKey="home.peptides" />
+          </div>
         </div>
       </section>
 

@@ -14,6 +14,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
     const allowed: Record<string, string> = {
       question: 'question',
       answer: 'answer',
+      category: 'category',
       sortOrder: 'sort_order',
       isActive: 'is_active',
     }

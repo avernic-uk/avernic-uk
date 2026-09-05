@@ -19,6 +19,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 interface FaqInput {
   question: string
   answer: string
+  category: string
   sortOrder: number
   isActive: boolean
 }
@@ -44,6 +45,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .insert({
         question: body.question.trim(),
         answer: body.answer.trim(),
+        category: (body.category ?? '').trim(),
         sort_order: sortOrder,
         is_active: body.isActive ?? true,
       })

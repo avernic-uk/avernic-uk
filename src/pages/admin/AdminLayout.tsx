@@ -8,6 +8,7 @@ const navItems = [
   { to: '/admin/products', label: 'Products' },
   { to: '/admin/categories', label: 'Categories' },
   { to: '/admin/reviews', label: 'Reviews' },
+  { to: '/admin/content', label: 'Content' },
   { to: '/admin/faqs', label: 'FAQs' },
   { to: '/admin/settings', label: 'Settings' },
 ]

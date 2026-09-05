@@ -33,6 +33,7 @@ import AccountOrderDetailPage from '@/pages/account/AccountOrderDetailPage'
 import AdminLayout from '@/pages/admin/AdminLayout'
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
 import AdminAnalyticsPage from '@/pages/admin/AdminAnalyticsPage'
+import AdminContentPage from '@/pages/admin/AdminContentPage'
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage'
 import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage'
 import AdminProductsPage from '@/pages/admin/AdminProductsPage'
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="products/:id" element={<AdminProductFormPage mode="edit" />} />
         <Route path="categories" element={<AdminCategoriesPage />} />
         <Route path="reviews" element={<AdminReviewsPage />} />
+        <Route path="content" element={<AdminContentPage />} />
         <Route path="faqs" element={<AdminFaqsPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>

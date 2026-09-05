@@ -51,6 +51,7 @@ interface FaqRow {
   id: string
   question: string
   answer: string
+  category: string | null
   sort_order: number
   is_active: boolean
 }
@@ -67,6 +68,7 @@ export async function getFaqs(): Promise<Faq[]> {
     id: row.id,
     question: row.question,
     answer: row.answer,
+    category: row.category ?? '',
     sortOrder: row.sort_order,
     isActive: row.is_active,
   }))

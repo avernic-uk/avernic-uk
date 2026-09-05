@@ -15,6 +15,7 @@ A UK-only e-commerce website for Avernic UK, selling cosmetic peptide skincare (
 - [Project structure](#project-structure)
 - [Theme & dark mode](#theme--dark-mode)
 - [SEO](#seo)
+- [Editable page content](#editable-page-content)
 - [Images and uploads](#images-and-uploads)
 - [Analytics](#analytics)
 - [UK-only enforcement](#uk-only-enforcement)
@@ -242,6 +243,40 @@ Both are built by `functions/_lib/llmsText.ts`. The **"What Avernic UK does not 
 them is load-bearing, not boilerplate: searches for "peptides" are dominated by injectable and
 research peptides, and stating the boundary in the document written for machines is what stops an
 answer engine describing this site as a source for them.
+
+## Editable page content
+
+All information-page copy lives in the `content_blocks` table (migration `0010`) and is edited at
+**Admin → Content**. Nothing on those pages requires a code change any more.
+
+Each block holds Markdown, rendered by `src/lib/content/markdown.tsx` — a deliberately small parser
+supporting `##`/`###` headings, `-`/`1.` lists, `**bold**`, `*italic*` and `[links](/path)`. It has
+**no raw-HTML path at all**: every output node is a React element built in that file. That is the
+point — this text comes from a textarea, and it feeds the terms and privacy pages, so there must be
+nothing to sanitise and nothing that can inject markup.
+
+Bodies may contain `{{companyName}}`, `{{companyNumber}}`, `{{registeredAddress}}`,
+`{{contactEmail}}`, `{{contactPhone}}`, `{{deliveryStandard}}`, `{{deliveryExpress}}` and
+`{{deliveryFreeThreshold}}`, substituted live from Admin → Settings. A token whose setting is still
+blank renders as a highlighted `[label]` rather than an empty gap — an unfinished company number
+should be impossible to miss, not silently absent from a sentence that then reads as finished.
+
+Pages compose blocks *around* the parts that can't be text: the cookie preference control, the live
+delivery pricing table, the contact form. Delivery prices in particular are generated from Settings
+rather than typed, because the same figures appear in the basket, at checkout, in `llms.txt` and in
+every product's structured data — letting someone re-type them as prose is how a page ends up quoting
+a price the checkout doesn't charge.
+
+Blocks whose copy still needs a human say `**TO BE COMPLETED —**`; Admin → Content detects that
+marker and shows a running list at the top of the page, so unfinished legal text can't quietly ship.
+
+Re-running migration `0010` restores a deleted block but never overwrites edited wording (`on
+conflict` refreshes only the label, hint and ordering, which are admin-UI metadata rather than
+content).
+
+**FAQ entries** are not blocks — they live in `faqs` and are edited at Admin → FAQs. The four groups
+that used to be hardcoded on the FAQ page now use the `category` column, so the whole page is
+editable there.
 
 ## Images and uploads
 

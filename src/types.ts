@@ -178,6 +178,8 @@ export interface Faq {
   id: UUID
   question: string
   answer: string
+  /** Optional grouping heading on the FAQ page. Empty entries appear under "General questions". */
+  category: string
   sortOrder: number
   isActive: boolean
 }
