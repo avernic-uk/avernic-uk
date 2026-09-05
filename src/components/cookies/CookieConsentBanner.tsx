@@ -42,6 +42,13 @@ function Switch({
  * all" (no pre-ticked boxes, no bias toward accepting), and the same choice
  * can always be revisited later via Footer → "Cookie preferences" or the
  * Cookie policy page.
+ *
+ * The copy below describes what the site actually does, which is the whole
+ * point of it. Analytics here is first-party and cookieless — it stores nothing
+ * on the device, so unlike a normal analytics category it does not need consent
+ * and is on by default. Saying so plainly, and giving a switch that genuinely
+ * stops it, is the honest position; quietly measuring people because no law
+ * requires a prompt is not.
  */
 export function CookieConsentBanner() {
   const { showBanner, showPreferences, categories, acceptAll, rejectNonEssential, savePreferences, openPreferences, closePreferences } =
@@ -70,8 +77,9 @@ export function CookieConsentBanner() {
           <div className="container-page flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="max-w-2xl text-sm leading-relaxed text-ink-700">
               We use strictly necessary cookies and local storage to run your basket, checkout and account sign-in.
-              We'd also like your permission to use optional analytics cookies to help us improve the site — these
-              stay off unless you say yes. See our{' '}
+              We also measure how the site is used — without cookies, and without collecting anything that
+              identifies you — and you can switch that off. We don't use advertising or tracking cookies at all.
+              See our{' '}
               <Link to="/cookies" className="underline">
                 Cookie policy
               </Link>{' '}
@@ -108,10 +116,12 @@ export function CookieConsentBanner() {
             <div>
               <p className="text-sm font-semibold text-ink-900">Analytics</p>
               <p className="mt-1 text-xs text-ink-500">
-                Helps us understand how the site is used, so we can improve it. Off unless you turn it on.
+                Counts visits and which pages and searches are popular, so we can improve the site. No cookies, no
+                tracking across other websites, and nothing that identifies you personally. Switch it off and we
+                won't count your visits at all.
               </p>
             </div>
-            <Switch checked={analyticsDraft} onChange={setAnalyticsDraft} label="Analytics cookies" />
+            <Switch checked={analyticsDraft} onChange={setAnalyticsDraft} label="Usage measurement" />
           </div>
 
           <p className="text-xs text-ink-500">

@@ -6,7 +6,7 @@ export default function TermsPage() {
   return (
     <InfoPageLayout title="Terms & conditions" description="The terms and conditions governing use of the Avernic UK website and orders." lastUpdated="[date]">
       <p>
-        These terms and conditions govern the use of the Avernic UK website (avernic.co.uk) and
+        These terms and conditions govern the use of the Avernic UK website (avernic.uk) and
         any order placed with Avernic UK. By using this website or placing an order, you agree to
         these terms.
       </p>

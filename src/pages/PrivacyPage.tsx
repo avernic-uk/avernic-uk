@@ -47,13 +47,36 @@ export default function PrivacyPage() {
         <a href="/contact" className="underline">Contact</a> page.
       </p>
 
-      <h2 className="text-lg font-semibold text-ink-900">7. Cookies</h2>
+      <h2 className="text-lg font-semibold text-ink-900">7. Website usage measurement</h2>
+      <p>
+        We measure how this website is used — visit counts, which pages and products are viewed, what people search
+        for, and which sites visitors arrive from — so we can improve the shop and decide what to stock. We do this
+        ourselves rather than using Google Analytics or any other third-party analytics service, so this data is
+        never shared with anyone and never leaves our systems.
+      </p>
+      <p>
+        It works without cookies and stores nothing on your device. To count visitors, our server combines your IP
+        address and browser type with a secret value that changes every day and converts them into a scrambled code.
+        Your IP address and browser details are used only for that calculation and are never stored. Because the
+        secret changes daily, the code cannot be linked back to you and cannot be used to recognise you on a later
+        visit. Detailed records are deleted after 90 days, leaving only anonymous daily totals.
+      </p>
+      <p>
+        We consider this data effectively anonymous, and our lawful basis for the measurement is our legitimate
+        interest in understanding and improving our own website. You can switch it off at any time from{' '}
+        <a href="/cookies" className="underline">
+          Cookie preferences
+        </a>
+        , and we automatically respect your browser's &ldquo;Do Not Track&rdquo; and Global Privacy Control settings.
+      </p>
+
+      <h2 className="text-lg font-semibold text-ink-900">8. Cookies</h2>
       <p>
         See our <a href="/cookies" className="underline">Cookie policy</a> for details of the
         cookies used on this website.
       </p>
 
-      <h2 className="text-lg font-semibold text-ink-900">8. Complaints</h2>
+      <h2 className="text-lg font-semibold text-ink-900">9. Complaints</h2>
       <p>
         If you have concerns about how we handle your data, you can also contact the Information
         Commissioner's Office (ICO) at ico.org.uk.

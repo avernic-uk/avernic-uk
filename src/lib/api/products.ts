@@ -8,6 +8,11 @@ interface ProductRow {
   name: string
   short_description: string
   full_description: string
+  size_label: string | null
+  key_ingredients: string | null
+  how_to_use: string | null
+  suitability: string | null
+  ingredients_inci: string | null
   price_minor: number
   compare_at_price_minor: number | null
   category_id: string
@@ -30,6 +35,13 @@ function mapProduct(row: ProductRow): Product {
     name: row.name,
     shortDescription: row.short_description,
     fullDescription: row.full_description,
+    // Nullish-coalesced so the storefront keeps working against a database
+    // where migration 0007 has not been applied yet.
+    sizeLabel: row.size_label ?? '',
+    keyIngredients: row.key_ingredients ?? '',
+    howToUse: row.how_to_use ?? '',
+    suitability: row.suitability ?? '',
+    ingredientsInci: row.ingredients_inci ?? '',
     priceMinor: row.price_minor,
     compareAtPriceMinor: row.compare_at_price_minor,
     categoryId: row.category_id,

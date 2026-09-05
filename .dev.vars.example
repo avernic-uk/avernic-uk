@@ -4,7 +4,7 @@
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 RESEND_API_KEY=
-RESEND_FROM_EMAIL=orders@avernic.co.uk
+RESEND_FROM_EMAIL=orders@avernic.uk
 ADMIN_NOTIFICATION_EMAIL=
 FENA_API_BASE_URL=
 FENA_INTEGRATION_ID=
@@ -12,3 +12,7 @@ FENA_SECRET_KEY=
 FENA_BANK_ACCOUNT_ID=
 FENA_WEBHOOK_SHARED_SECRET=
 SITE_URL=http://localhost:5173
+
+# Secret salt for the cookieless analytics visitor hash (see README -> Analytics).
+# Use a long random string. Without it, a publicly-known fallback salt is used.
+ANALYTICS_SALT=change-me-to-a-long-random-string

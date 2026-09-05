@@ -20,7 +20,7 @@ import type { Env } from './types'
 export const SITE_NAME = 'Avernic UK'
 const DEFAULT_TITLE = 'Avernic UK — Peptide skincare, made simpler.'
 const DEFAULT_DESCRIPTION =
-  'Avernic UK: cosmetic peptide skincare — serums, moisturisers and treatments — delivered across the UK with secure Open Banking payment. Skincare only; not medicines. 18+.'
+  'Cosmetic peptide skincare from Avernic UK — serums, moisturisers, eye care and treatments, HPLC-tested for purity. UK delivery, Open Banking checkout. 18+.'
 const DEFAULT_IMAGE_PATH = '/logo-lockup.png'
 
 export interface PageMeta {
@@ -226,6 +226,11 @@ interface ProductRow {
   sku: string
   name: string
   short_description: string
+  size_label: string | null
+  key_ingredients: string | null
+  how_to_use: string | null
+  suitability: string | null
+  ingredients_inci: string | null
   price_minor: number
   stock_quantity: number
   image_url: string
@@ -294,12 +299,88 @@ async function cached<T>(key: string, ttlSeconds: number, load: () => Promise<T>
   return value
 }
 
+/**
+ * Delivery and returns terms as structured data, mirroring the client-side
+ * copy in src/pages/ProductPage.tsx — keep the two in step. Rates come from
+ * Admin → Settings so schema can never promise a shipping price that differs
+ * from what checkout charges; 14 days is the window stated on /returns.
+ */
+const RETURN_POLICY_JSONLD = {
+  '@type': 'MerchantReturnPolicy',
+  applicableCountry: 'GB',
+  returnPolicyCountry: 'GB',
+  returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+  merchantReturnDays: 14,
+  returnMethod: 'https://schema.org/ReturnByMail',
+  returnFees: 'https://schema.org/ReturnShippingFees',
+}
+
+function shippingDetailsJsonLd(standardMinor: number, expressMinor: number): Record<string, unknown>[] {
+  const destination = { '@type': 'DefinedRegion', addressCountry: 'GB' }
+  const handlingTime = { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' }
+  return [
+    {
+      '@type': 'OfferShippingDetails',
+      name: 'Royal Mail 48hr Tracked',
+      shippingRate: { '@type': 'MonetaryAmount', value: (standardMinor / 100).toFixed(2), currency: 'GBP' },
+      shippingDestination: destination,
+      deliveryTime: {
+        '@type': 'ShippingDeliveryTime',
+        handlingTime,
+        transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
+      },
+    },
+    {
+      '@type': 'OfferShippingDetails',
+      name: 'Royal Mail 24hr Tracked & Signed',
+      shippingRate: { '@type': 'MonetaryAmount', value: (expressMinor / 100).toFixed(2), currency: 'GBP' },
+      shippingDestination: destination,
+      deliveryTime: {
+        '@type': 'ShippingDeliveryTime',
+        handlingTime,
+        transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 1, unitCode: 'DAY' },
+      },
+    },
+  ]
+}
+
+/** Splits a stored multi-line detail field into trimmed, non-empty lines. Mirrors src/lib/productDetail.ts. */
+function parseLines(value: string | null): string[] {
+  return (value ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+/**
+ * The product detail fields restated as schema.org PropertyValue entries, so
+ * an answer engine asked "how do I use X" or "what's in X" has a definitive
+ * machine-readable answer rather than having to infer one from prose.
+ */
+function productProperties(product: ProductRow): Record<string, string>[] {
+  const props: Record<string, string>[] = []
+  const push = (name: string, value: string) => {
+    if (value) props.push({ '@type': 'PropertyValue', name, value })
+  }
+  push('Size', product.size_label ?? '')
+  push(
+    'Key ingredients',
+    parseLines(product.key_ingredients)
+      .map((line) => line.replace(/\s+[—–]\s+/, ': '))
+      .join(' '),
+  )
+  push('How to use', parseLines(product.how_to_use).join(' '))
+  push('Suitable for', (product.suitability ?? '').replace(/\s*\n\s*/g, ' ').trim())
+  push('Ingredients (INCI)', product.ingredients_inci ?? '')
+  return props
+}
+
 async function loadProduct(env: Env, slug: string): Promise<ProductRow | null> {
   const supabase = getSupabaseAdmin(env)
   const { data } = await supabase
     .from('products')
     .select(
-      'id, slug, sku, name, short_description, price_minor, stock_quantity, image_url, additional_images, product_categories ( slug, name )',
+      'id, slug, sku, name, short_description, size_label, key_ingredients, how_to_use, suitability, ingredients_inci, price_minor, stock_quantity, image_url, additional_images, product_categories ( slug, name )',
     )
     .eq('slug', slug)
     .eq('is_active', true)
@@ -313,6 +394,72 @@ async function loadCategory(env: Env, slug: string): Promise<{ slug: string; nam
   return data ?? null
 }
 
+interface ListedProduct {
+  slug: string
+  name: string
+  price_minor: number
+}
+
+/**
+ * The products in a category, for the category page's ItemList. Without this a
+ * category page is just a heading and a client-rendered grid: a crawler that
+ * doesn't run JavaScript sees no products on it at all, which is why category
+ * pages tend to rank for nothing. The list names each product and links it, so
+ * the page has something to be about even before React boots.
+ */
+async function loadCategoryProducts(env: Env, categorySlug: string): Promise<ListedProduct[]> {
+  const supabase = getSupabaseAdmin(env)
+  const { data } = await supabase
+    .from('products')
+    .select('slug, name, price_minor, product_categories!inner(slug)')
+    .eq('is_active', true)
+    .eq('product_categories.slug', categorySlug)
+    .order('name', { ascending: true })
+    .limit(50)
+  return ((data ?? []) as unknown as ListedProduct[]).map((p) => ({
+    slug: p.slug,
+    name: p.name,
+    price_minor: p.price_minor,
+  }))
+}
+
+/** The whole live catalogue, for the /shop collection listing. */
+async function loadAllProducts(env: Env): Promise<ListedProduct[]> {
+  const supabase = getSupabaseAdmin(env)
+  const { data } = await supabase
+    .from('products')
+    .select('slug, name, price_minor')
+    .eq('is_active', true)
+    .order('name', { ascending: true })
+    .limit(100)
+  return (data ?? []) as ListedProduct[]
+}
+
+/** Wraps a product list as a schema.org ItemList of linked, priced Products. */
+function itemListJsonLd(site: string, id: string, name: string, products: ListedProduct[]): Record<string, unknown> {
+  return {
+    '@type': 'ItemList',
+    '@id': id,
+    name,
+    numberOfItems: products.length,
+    itemListElement: products.map((p, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Product',
+        '@id': `${site}/product/${p.slug}#product`,
+        name: p.name,
+        url: `${site}/product/${p.slug}`,
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'GBP',
+          price: (p.price_minor / 100).toFixed(2),
+        },
+      },
+    })),
+  }
+}
+
 function absolutise(site: string, url: string): string {
   if (!url) return `${site}${DEFAULT_IMAGE_PATH}`
   return /^https?:\/\//i.test(url) ? url : `${site}${url.startsWith('/') ? '' : '/'}${url}`
@@ -323,6 +470,42 @@ export async function resolvePageMeta(env: Env, requestUrl: URL): Promise<PageMe
   const origin = requestUrl.origin
   const site = siteUrl(env, origin)
   const path = normalisePath(requestUrl.pathname)
+
+  // /shop is a static page as far as titles go, but it's also the site's main
+  // collection — give it an ItemList of the live catalogue for the same reason
+  // category pages get one: without it, a crawler that doesn't run JavaScript
+  // sees an empty grid on the most important commercial page on the site.
+  if (path === '/shop') {
+    const meta = await base(env, origin, path, STATIC_PAGES['/shop'])
+    try {
+      const [orgNodes, products] = await Promise.all([
+        loadOrganizationGraph(env, site),
+        cached('/shop-products', 300, () => loadAllProducts(env)),
+      ])
+      const shopUrl = `${site}/shop`
+      meta.jsonLd = graph(
+        ...orgNodes,
+        {
+          '@type': 'CollectionPage',
+          '@id': `${shopUrl}#collection`,
+          name: `${SITE_NAME} — full range`,
+          url: shopUrl,
+          description: STATIC_PAGES['/shop'].description,
+          isPartOf: { '@id': `${site}/#website` },
+          ...(products.length > 0
+            ? { mainEntity: itemListJsonLd(site, `${shopUrl}#products`, `${SITE_NAME} products`, products) }
+            : {}),
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Shop', item: shopUrl }],
+        },
+      )
+    } catch {
+      // Fall back to the plain static meta rather than failing the page.
+    }
+    return meta
+  }
 
   const staticPage = STATIC_PAGES[path]
   if (staticPage) return base(env, origin, path, staticPage)
@@ -335,13 +518,15 @@ export async function resolvePageMeta(env: Env, requestUrl: URL): Promise<PageMe
   if (productMatch) {
     const slug = productMatch[1].toLowerCase()
     try {
-      const [product, orgNodes] = await Promise.all([
+      const [product, orgNodes, settings] = await Promise.all([
         cached(`/product/${slug}`, 120, () => loadProduct(env, slug)),
         loadOrganizationGraph(env, site),
+        cached('/__seo/settings', 300, async () => getSiteSettings(getSupabaseAdmin(env))),
       ])
       if (!product) return base(env, origin, path, { title: 'Product not found', description: DEFAULT_DESCRIPTION, noindex: true }, 404)
 
       const reviews = await loadReviews(env, product.id)
+      const properties = productProperties(product)
 
       const category = Array.isArray(product.product_categories) ? product.product_categories[0] : product.product_categories
       const productUrl = `${site}/product/${product.slug}`
@@ -369,6 +554,8 @@ export async function resolvePageMeta(env: Env, requestUrl: URL): Promise<PageMe
             image: images,
             url: productUrl,
             brand: { '@type': 'Brand', name: SITE_NAME },
+            ...(product.size_label ? { size: product.size_label } : {}),
+            ...(properties.length > 0 ? { additionalProperty: properties } : {}),
             offers: {
               '@type': 'Offer',
               url: productUrl,
@@ -378,6 +565,8 @@ export async function resolvePageMeta(env: Env, requestUrl: URL): Promise<PageMe
               itemCondition: 'https://schema.org/NewCondition',
               areaServed: 'GB',
               seller: { '@id': `${site}/#organization` },
+              shippingDetails: shippingDetailsJsonLd(settings.deliveryStandardMinor, settings.deliveryExpressMinor),
+              hasMerchantReturnPolicy: RETURN_POLICY_JSONLD,
             },
             ...(reviews.count > 0
               ? {
@@ -426,17 +615,36 @@ export async function resolvePageMeta(env: Env, requestUrl: URL): Promise<PageMe
         loadOrganizationGraph(env, site),
       ])
       if (!category) return base(env, origin, path, { title: 'Category not found', description: DEFAULT_DESCRIPTION, noindex: true }, 404)
+
+      const products = await cached(`/category-products/${slug}`, 300, () => loadCategoryProducts(env, slug))
+      const categoryUrl = `${site}/shop/${category.slug}`
       const meta = await base(env, origin, `/shop/${category.slug}`, {
         title: category.name,
-        description: category.description || `Shop ${category.name.toLowerCase()} at ${SITE_NAME} — UK delivery and secure Open Banking payment.`,
+        description:
+          category.description ||
+          `Shop ${category.name.toLowerCase()} at ${SITE_NAME} — cosmetic peptide skincare, HPLC-tested, with UK delivery and Open Banking checkout.`,
       })
-      meta.jsonLd = graph(...orgNodes, {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Shop', item: `${site}/shop` },
-          { '@type': 'ListItem', position: 2, name: category.name },
-        ],
-      })
+      meta.jsonLd = graph(
+        ...orgNodes,
+        {
+          '@type': 'CollectionPage',
+          '@id': `${categoryUrl}#collection`,
+          name: category.name,
+          url: categoryUrl,
+          ...(category.description ? { description: category.description } : {}),
+          isPartOf: { '@id': `${site}/#website` },
+          ...(products.length > 0
+            ? { mainEntity: itemListJsonLd(site, `${categoryUrl}#products`, category.name, products) }
+            : {}),
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Shop', item: `${site}/shop` },
+            { '@type': 'ListItem', position: 2, name: category.name },
+          ],
+        },
+      )
       return meta
     } catch {
       return base(env, origin, path, { title: 'Category', description: DEFAULT_DESCRIPTION })

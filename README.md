@@ -15,6 +15,7 @@ A UK-only e-commerce website for Avernic UK, selling cosmetic peptide skincare (
 - [Project structure](#project-structure)
 - [Theme & dark mode](#theme--dark-mode)
 - [SEO](#seo)
+- [Analytics](#analytics)
 - [UK-only enforcement](#uk-only-enforcement)
 - [Security notes](#security-notes)
 - [Testing](#testing)
@@ -50,13 +51,16 @@ used by `functions/`). Summary:
 | `FENA_API_BASE_URL` | Server only | Optional override; defaults to Fena's production API |
 | `FENA_WEBHOOK_SHARED_SECRET` | Server only | Optional; guards the Fena webhook endpoint against noise, see below |
 | `SITE_URL` / `VITE_SITE_URL` | Both | Used to build absolute links (emails, sitemap, Fena redirect URL) |
+| `ANALYTICS_SALT` | Server only | Secret salt for the cookieless analytics visitor hash — **set this in production**, see [Analytics](#analytics) |
 
 ## Database setup (Supabase)
 
 1. Create a new Supabase project.
-2. Run `supabase/migrations/0001_init.sql` against it (Supabase SQL editor, or `supabase db push`
-   if you set up the CLI). This creates every table, constraint, index, and Row Level Security
-   policy.
+2. Run every file in `supabase/migrations/` against it **in filename order** (Supabase SQL editor,
+   or `supabase db push` if you set up the CLI). `0001_init.sql` creates every table, constraint,
+   index and Row Level Security policy; the later migrations add admin-editable site content, SEO
+   settings, product reviews, Royal Mail shipping options and the product detail fields. They are
+   written to be idempotent (`if not exists` / guarded `update`s), so re-running one is safe.
 3. Optionally run `supabase/seed.sql` to populate a working sample catalogue (placeholder products
    — replace with your real catalogue before launch).
 4. Create your first admin user: register an account through the site (`/register`), then in the
@@ -184,7 +188,88 @@ Two layers, sharing one set of `data-seo="…"`-tagged elements declared in `ind
 
 Also: dynamic `sitemap.xml` from the live catalogue, `robots.txt` excluding private/transactional paths and search-result URLs, absolute `og:image` URLs, `max-image-preview:large`.
 
-`SITE_URL` (server) / `VITE_SITE_URL` (browser) should be the site's real public origin — canonical and `og:url` tags are built from them (falling back to the request origin when unset). Once a custom domain is live, set both to it and keep `robots.txt`'s `Sitemap:` line in step.
+### Canonical domain
+
+The canonical origin is **`https://avernic.uk`** (apex, no `www`). It is set in `wrangler.toml`
+(`SITE_URL`), `index.html`, `public/robots.txt` and the fallbacks in `src/lib/seo.ts`,
+`functions/_lib/seoMeta.ts`, `functions/_lib/llmsText.ts` and `functions/sitemap.xml.ts`. If it ever
+changes, change it in all of them together.
+
+`functions/_middleware.ts` also 301-redirects duplicate hostnames onto it — `www.avernic.uk` and the
+Cloudflare project domain `avernic-uk.pages.dev` — so the same catalogue can't be crawled and ranked
+three times over. Deliberately narrow: it only redirects `GET`/`HEAD`, never `/api/*` (a 301 would
+break the Fena webhook), and never hashed preview deployments like
+`<hash>.avernic-uk.pages.dev`, which stay independently testable.
+
+### Structured data
+
+Product pages carry `Product` + `Offer` + `BreadcrumbList`, and — when a product has approved
+reviews — `aggregateRating` and `review`. The `Offer` includes `shippingDetails` for both Royal Mail
+options (rates read from Admin → Settings, so schema can never quote a price checkout doesn't
+charge) and a `hasMerchantReturnPolicy` of 14 days, matching `/returns`. The product detail fields
+are also emitted as `additionalProperty` entries. `/shop` and each category page carry
+`CollectionPage` + `ItemList`, which is what gives them something to rank for before React boots.
+
+The browser and the edge build the same shapes independently — `src/pages/ProductPage.tsx` and
+`functions/_lib/seoMeta.ts` — so **when you change one, change the other**.
+
+### AI answer engines (AIO)
+
+`robots.txt` explicitly allows the major AI crawlers, and two documents are published for them
+following the [llms.txt convention](https://llmstxt.org/), both generated live from the same
+admin-editable content the storefront renders:
+
+- **`/llms.txt`** — the index: what the shop is, business details, delivery and returns, the
+  cosmetic-only boundary, a plain explanation of cosmetic peptides, categories, a one-line-per-
+  product catalogue, and FAQs.
+- **`/llms-full.txt`** — the whole catalogue in full: every product's complete description, key
+  ingredients, numbered usage steps, suitability and INCI list.
+
+Both are built by `functions/_lib/llmsText.ts`. The **"What Avernic UK does not sell"** section in
+them is load-bearing, not boilerplate: searches for "peptides" are dominated by injectable and
+research peptides, and stating the boundary in the document written for machines is what stops an
+answer engine describing this site as a source for them.
+
+## Analytics
+
+First-party and cookieless, in `analytics_events` / `analytics_daily` (migration `0008_analytics.sql`),
+with a dashboard at **Admin → Analytics**. No Google Analytics, no third-party script, no data leaving
+this Supabase project.
+
+**Why cookieless.** PECR requires consent to store or read information on a visitor's device. This
+stores nothing there, so no consent gate applies and measurement covers every visitor rather than only
+the minority who accept a banner. The site still offers a real opt-out, and honours `DNT` /
+`Sec-GPC`.
+
+**How a visitor is counted without a cookie.** `functions/api/track.ts` hashes
+`(daily-rotating salt + IP + user agent)` with SHA-256 and stores only that. The raw IP and user agent
+are used for the hash and discarded — neither is ever written to the database, and nor is the full
+referring URL (hostname only) or any query string. The salt rotates every 24h, so the same person on
+two consecutive days produces two unrelated hashes. **That is deliberate, not a bug to fix:** being
+unable to follow someone across days is what keeps the data effectively anonymous. It does mean
+"visitors" is really "visitors per day", and multi-day returning-visitor rates are not knowable.
+
+Set **`ANALYTICS_SALT`** to a long random string in the Cloudflare Pages environment. Without it the
+code falls back to a known constant, and someone aware of the scheme could test whether a *specific*
+IP had visited.
+
+**What's excluded.** Known bots and crawlers by user-agent (including the AI crawlers `robots.txt`
+deliberately invites, which would otherwise register as a large fake audience), and the `/admin`,
+`/account`, `/checkout`, `/basket` and auth routes.
+
+**Retention.** Raw events are kept 90 days, then `rollup_analytics()` aggregates them into
+`analytics_daily` (counts only, no visitor hashes) and deletes them. A `pg_cron` job
+`avernic-analytics-rollup` runs nightly at 03:30 UTC; the admin analytics API also calls the same
+function opportunistically, so retention still works if that job is ever removed. Both are idempotent.
+
+**Adding events.** The table already carries an `event_type` check constraint — extend it, add a
+`trackEvent` call, and extend `analytics_summary()`. Basket and checkout funnel events were
+deliberately *not* built (not requested), but the schema takes them without change.
+
+**Charts** are hand-drawn SVG in `AdminAnalyticsPage.tsx`, single-hue (`rgb(var(--accent-500))`,
+validated at 3.2:1 on the light surface and 6.1:1 on the dark one). Nothing on that page encodes
+identity by colour, so no categorical palette is needed — and the design system only has one accent
+hue, so inventing one would look foreign.
 
 ## UK-only enforcement
 
@@ -270,11 +355,26 @@ This is **not** production-ready as-is. Outstanding, in priority order:
 3. **Real business/legal details** — every `[placeholder]` in the footer, About, Contact, Terms,
    Privacy, Cookies, Delivery and Returns pages needs the real company name, registration number,
    registered address, contact details, and reviewed legal text (ideally by a solicitor).
-4. **Real product catalogue** — replace `supabase/seed.sql` with real products, descriptions, and
-   images (currently Unsplash stock photography placeholders).
+4. **Real product catalogue** — product photography is still Unsplash stock. The written copy is no
+   longer placeholder: migration `0007_product_detail.sql` adds `size_label`, `key_ingredients`,
+   `how_to_use`, `suitability` and `ingredients_inci` to `products`, and seeds **draft** copy for all
+   ten real products. Two things still need a human before launch:
+   - **Review the draft copy** in Admin → Products. It is written to stay inside cosmetic claim
+     boundaries (appearance, feel and look only — nothing stating or implying a physiological or
+     therapeutic effect), but it has not been checked against the actual formulations. In
+     particular, confirm the named actives are really in each product.
+   - **Fill in `ingredients_inci`** for every product, from the supplier's specification. It is
+     deliberately left empty and was never auto-generated: it is a regulated declaration that a
+     customer with an allergy relies on, so it must match the formulation exactly. The product page
+     simply hides the section while it is blank.
+
+   Each seeding `UPDATE` is guarded on the original placeholder text still being present, so the
+   migration is safe to re-run and will never overwrite copy edited by hand afterwards.
 5. **Delivery pricing** — `functions/_lib/pricing.ts` has placeholder delivery pricing (£2.95,
    free over £40); confirm and update the real figures.
-6. **Supabase project, Resend domain verification, Cloudflare Pages project** all need to be
+6. **Set `ANALYTICS_SALT`** to a long random string in the Cloudflare Pages environment (see
+   Analytics above) — without it the analytics visitor hash uses a publicly-known fallback salt.
+7. **Supabase project, Resend domain verification, Cloudflare Pages project** all need to be
    created and connected end-to-end, then the full checkout → payment → webhook → email chain
    needs to be tested against them for real.
-7. **Stay within the product scope above.** If the business wants to expand beyond topical cosmetic skincare (injectables, ingestibles, anything making a medical claim), that needs a UK healthcare regulatory lawyer's input before it's added to this codebase — not just a new product row.
+8. **Stay within the product scope above.** If the business wants to expand beyond topical cosmetic skincare (injectables, ingestibles, anything making a medical claim), that needs a UK healthcare regulatory lawyer's input before it's added to this codebase — not just a new product row.

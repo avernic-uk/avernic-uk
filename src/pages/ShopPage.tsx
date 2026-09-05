@@ -7,6 +7,7 @@ import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { queryProducts, getCategories, type ProductQuery } from '@/lib/api/products'
+import { trackSearch } from '@/lib/analytics/track'
 import type { Product, ProductCategory } from '@/types'
 
 const PAGE_SIZE = 12
@@ -49,6 +50,10 @@ export default function ShopPage() {
       .then((res) => {
         if (cancelled) return
         setResult(res)
+        // Record the search term alongside how many products it actually
+        // returned. Searches that come back empty are the useful ones: they
+        // are a direct list of what customers came looking for and didn't find.
+        if (q.trim()) trackSearch(q, res.total, '/shop')
       })
       .catch((err) => {
         if (cancelled) return

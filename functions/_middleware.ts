@@ -18,6 +18,49 @@ import type { Env } from './_lib/types'
 // the app boots, so the two never disagree.
 // ============================================================================
 
+/**
+ * The site answers on more than one hostname: the canonical custom domain
+ * (SITE_URL), its `www.` form, and the Cloudflare Pages project domain
+ * `avernic-uk.pages.dev`. Left alone, a crawler can index the same catalogue
+ * three times over and split its ranking signals across them. The canonical
+ * <link> tag below already names one winner, but a 301 is a far stronger
+ * signal and stops the duplicates being fetched at all.
+ *
+ * Deliberately narrow about which hosts it redirects:
+ *   - `www.<canonical>`            → canonical
+ *   - `<project>.pages.dev`        → canonical  (exactly three labels)
+ *   - `<hash>.<project>.pages.dev` → left alone, so preview deployments of a
+ *                                    branch stay testable on their own URL
+ * and it does nothing at all unless SITE_URL is a real custom domain, so
+ * local dev and pages.dev-only deployments can't redirect-loop.
+ */
+function canonicalRedirect(request: Request, url: URL, siteUrl: string | undefined): Response | null {
+  if (!siteUrl) return null
+  // Only ever redirect reads. A 301 on an inbound POST would break any API
+  // caller configured against another hostname — most importantly the Fena
+  // payment webhook, which does not follow redirects.
+  if (request.method !== 'GET' && request.method !== 'HEAD') return null
+  if (url.pathname.startsWith('/api/')) return null
+  let canonical: URL
+  try {
+    canonical = new URL(siteUrl)
+  } catch {
+    return null
+  }
+  const canonicalHost = canonical.host
+  if (!canonicalHost || canonicalHost === url.host) return null
+  // Don't redirect towards a host that is itself a staging/dev origin.
+  if (canonicalHost.endsWith('.pages.dev') || canonicalHost.startsWith('localhost') || canonicalHost.startsWith('127.')) return null
+
+  const host = url.host
+  const isWwwOfCanonical = host === `www.${canonicalHost}`
+  const isProjectPagesDev = host.endsWith('.pages.dev') && host.split('.').length === 3
+  if (!isWwwOfCanonical && !isProjectPagesDev) return null
+
+  const target = new URL(url.pathname + url.search, canonical.origin)
+  return Response.redirect(target.toString(), 301)
+}
+
 function isPageRequest(request: Request, url: URL): boolean {
   if (request.method !== 'GET' && request.method !== 'HEAD') return false
   if (url.pathname.startsWith('/api/')) return false
@@ -93,6 +136,12 @@ function rewrite(response: Response, meta: PageMeta, site: string): Response {
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env, next } = context
   const url = new URL(request.url)
+
+  // Collapse duplicate hostnames onto the canonical domain before anything
+  // else — including for /sitemap.xml, /robots.txt and /llms.txt, so those
+  // never get fetched (or cited) under a staging hostname either.
+  const redirect = canonicalRedirect(request, url, env.SITE_URL)
+  if (redirect) return redirect
 
   if (!isPageRequest(request, url)) return next()
 

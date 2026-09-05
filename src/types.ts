@@ -28,6 +28,16 @@ export interface Product {
   name: string
   shortDescription: string
   fullDescription: string
+  /** Pack size as shown to the customer, e.g. "50ml" or "Box of 5 masks". */
+  sizeLabel: string
+  /** One "Name — what it does" per line. */
+  keyIngredients: string
+  /** One step per line; numbering is applied by the UI, not stored. */
+  howToUse: string
+  /** Who the product is for / skin types. */
+  suitability: string
+  /** Full INCI declaration. Must match the actual formulation. */
+  ingredientsInci: string
   /** Price in pence (integer, GBP). Never store money as a float. */
   priceMinor: number
   /** Optional "was" price in pence, for showing a strike-through comparison. */

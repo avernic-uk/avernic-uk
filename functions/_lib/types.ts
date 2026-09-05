@@ -20,6 +20,13 @@ export interface Env {
   FENA_BANK_ACCOUNT_ID?: string
   FENA_WEBHOOK_SHARED_SECRET: string
   SITE_URL: string
+  /**
+   * Server-side secret used to salt the analytics visitor hash. Optional, but
+   * set it in production: it is what stops anyone who knows the hashing scheme
+   * from testing whether a specific IP address visited the site. See
+   * functions/api/track.ts.
+   */
+  ANALYTICS_SALT?: string
 }
 
 export type PagesFunctionContext = {

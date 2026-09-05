@@ -19,6 +19,11 @@ interface FormState {
   name: string
   shortDescription: string
   fullDescription: string
+  sizeLabel: string
+  keyIngredients: string
+  howToUse: string
+  suitability: string
+  ingredientsInci: string
   price: string // pounds, as typed
   compareAtPrice: string
   categoryId: string
@@ -35,6 +40,11 @@ interface AdminProductRow {
   name: string
   short_description: string | null
   full_description: string | null
+  size_label: string | null
+  key_ingredients: string | null
+  how_to_use: string | null
+  suitability: string | null
+  ingredients_inci: string | null
   price_minor: number
   compare_at_price_minor: number | null
   category_id: string
@@ -51,6 +61,11 @@ const empty: FormState = {
   name: '',
   shortDescription: '',
   fullDescription: '',
+  sizeLabel: '',
+  keyIngredients: '',
+  howToUse: '',
+  suitability: '',
+  ingredientsInci: '',
   price: '',
   compareAtPrice: '',
   categoryId: '',
@@ -59,6 +74,45 @@ const empty: FormState = {
   additionalImages: [],
   isActive: true,
   isFeatured: false,
+}
+
+/** Labelled textarea matching the Input component's look, with an optional hint below. */
+function Textarea({
+  id,
+  label,
+  rows,
+  value,
+  onChange,
+  hint,
+}: {
+  id: string
+  label: string
+  rows: number
+  value: string
+  onChange: (value: string) => void
+  hint?: string
+}) {
+  const hintId = hint ? `${id}-hint` : undefined
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-ink-800">
+        {label}
+      </label>
+      <textarea
+        id={id}
+        rows={rows}
+        value={value}
+        aria-describedby={hintId}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-ink-300 bg-white p-3 text-sm text-ink-900 focus-visible:outline-2 focus-visible:outline-accent-500 dark:bg-ink-50"
+      />
+      {hint && (
+        <p id={hintId} className="mt-1 text-xs text-ink-500">
+          {hint}
+        </p>
+      )}
+    </div>
+  )
 }
 
 function poundsToMinor(value: string): number {
@@ -90,6 +144,11 @@ export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit'
           name: product.name,
           shortDescription: product.short_description ?? '',
           fullDescription: product.full_description ?? '',
+          sizeLabel: product.size_label ?? '',
+          keyIngredients: product.key_ingredients ?? '',
+          howToUse: product.how_to_use ?? '',
+          suitability: product.suitability ?? '',
+          ingredientsInci: product.ingredients_inci ?? '',
           price: (product.price_minor / 100).toString(),
           compareAtPrice: product.compare_at_price_minor ? (product.compare_at_price_minor / 100).toString() : '',
           categoryId: product.category_id,
@@ -118,6 +177,11 @@ export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit'
       name: form.name.trim(),
       shortDescription: form.shortDescription,
       fullDescription: form.fullDescription,
+      sizeLabel: form.sizeLabel,
+      keyIngredients: form.keyIngredients,
+      howToUse: form.howToUse,
+      suitability: form.suitability,
+      ingredientsInci: form.ingredientsInci,
       priceMinor: poundsToMinor(form.price),
       compareAtPriceMinor: form.compareAtPrice ? poundsToMinor(form.compareAtPrice) : null,
       categoryId: form.categoryId,
@@ -226,29 +290,80 @@ export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit'
           </div>
         </div>
 
-        <div>
-          <label htmlFor="shortDescription" className="mb-1.5 block text-sm font-medium text-ink-800">
-            Short description
-          </label>
-          <textarea
-            id="shortDescription"
-            rows={2}
-            value={form.shortDescription}
-            onChange={(e) => set('shortDescription', e.target.value)}
-            className="w-full rounded-lg border border-ink-300 p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent-500"
-          />
-        </div>
-        <div>
-          <label htmlFor="fullDescription" className="mb-1.5 block text-sm font-medium text-ink-800">
-            Full description
-          </label>
-          <textarea
-            id="fullDescription"
-            rows={6}
-            value={form.fullDescription}
-            onChange={(e) => set('fullDescription', e.target.value)}
-            className="w-full rounded-lg border border-ink-300 p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent-500"
-          />
+        <Textarea
+          id="shortDescription"
+          label="Short description"
+          rows={2}
+          value={form.shortDescription}
+          onChange={(v) => set('shortDescription', v)}
+          hint="One sentence. Used on product cards, and as the meta description search engines show in results — aim for under 160 characters."
+        />
+        <Textarea
+          id="fullDescription"
+          label="Full description"
+          rows={8}
+          value={form.fullDescription}
+          onChange={(v) => set('fullDescription', v)}
+          hint="The main body copy on the product page, and the largest single source of indexable content a search engine or AI answer engine has for this product. Blank lines separate paragraphs."
+        />
+
+        {/* ------------------------------------------------------------------
+            Product detail. These four fields are what turn a product page from
+            a price and a photo into something a customer can actually decide
+            from — and what gets surfaced as structured data to search engines.
+            All are optional: each section is simply omitted from the product
+            page when its field is left empty.
+        ------------------------------------------------------------------- */}
+        <div className="rounded-2xl border border-ink-200 bg-ink-50/60 p-5">
+          <h2 className="text-sm font-semibold text-ink-900">Product detail</h2>
+          <p className="mt-1 text-xs text-ink-500">
+            Shown as separate sections on the product page. Leave any of them blank to hide that section.
+          </p>
+
+          <div className="mt-4 space-y-4">
+            <Input
+              label="Size / pack"
+              value={form.sizeLabel}
+              onChange={(e) => set('sizeLabel', e.target.value)}
+              hint='As the customer should read it, e.g. "50ml" or "Box of 5 masks".'
+            />
+
+            <Textarea
+              id="keyIngredients"
+              label="Key ingredients"
+              rows={4}
+              value={form.keyIngredients}
+              onChange={(v) => set('keyIngredients', v)}
+              hint="One per line, written as “Name — what it does”. The part before the dash is shown as the ingredient name."
+            />
+
+            <Textarea
+              id="howToUse"
+              label="How to use"
+              rows={5}
+              value={form.howToUse}
+              onChange={(v) => set('howToUse', v)}
+              hint="One step per line. The page numbers them automatically, so don't number them here."
+            />
+
+            <Textarea
+              id="suitability"
+              label="Who it's for"
+              rows={3}
+              value={form.suitability}
+              onChange={(v) => set('suitability', v)}
+              hint="Skin types and any usage caveats. Keep to cosmetic suitability — not medical advice."
+            />
+
+            <Textarea
+              id="ingredientsInci"
+              label="Full ingredients (INCI)"
+              rows={4}
+              value={form.ingredientsInci}
+              onChange={(v) => set('ingredientsInci', v)}
+              hint="The full INCI declaration, copied exactly from the supplier's product specification. This is what a customer with an allergy relies on, so it must match the actual formulation — never write it from memory."
+            />
+          </div>
         </div>
 
         <div className="flex gap-8">

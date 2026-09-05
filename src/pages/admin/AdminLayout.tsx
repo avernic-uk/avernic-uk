@@ -3,6 +3,7 @@ import { useAuth } from '@/lib/auth/AuthProvider'
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', end: true },
+  { to: '/admin/analytics', label: 'Analytics' },
   { to: '/admin/orders', label: 'Orders' },
   { to: '/admin/products', label: 'Products' },
   { to: '/admin/categories', label: 'Categories' },

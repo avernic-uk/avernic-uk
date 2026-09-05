@@ -34,6 +34,11 @@ interface ProductInput {
   name: string
   shortDescription: string
   fullDescription: string
+  sizeLabel: string
+  keyIngredients: string
+  howToUse: string
+  suitability: string
+  ingredientsInci: string
   priceMinor: number
   compareAtPriceMinor: number | null
   categoryId: string
@@ -81,6 +86,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         name: body.name!.trim(),
         short_description: body.shortDescription ?? '',
         full_description: body.fullDescription ?? '',
+        size_label: body.sizeLabel ?? '',
+        key_ingredients: body.keyIngredients ?? '',
+        how_to_use: body.howToUse ?? '',
+        suitability: body.suitability ?? '',
+        ingredients_inci: body.ingredientsInci ?? '',
         price_minor: body.priceMinor,
         compare_at_price_minor: body.compareAtPriceMinor ?? null,
         category_id: body.categoryId,

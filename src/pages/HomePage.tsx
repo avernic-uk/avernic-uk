@@ -8,6 +8,7 @@ import { Alert } from '@/components/ui/Alert'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { useFaqJsonLd } from '@/lib/useFaqJsonLd'
 import { getFeaturedProducts, getCategories } from '@/lib/api/products'
+import { formatGBP } from '@/lib/format'
 import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 import type { Product, ProductCategory } from '@/types'
 
@@ -19,11 +20,12 @@ const steps = [
 ]
 
 export default function HomePage() {
-  useDocumentMeta({
-    title: 'Peptide skincare, made simpler',
-    description:
-      'Shop peptide serums, moisturisers and treatments online at Avernic UK. Cosmetic skincare only, UK delivery, secure Open Banking payment. 18+.',
-  })
+  // Title and description are deliberately left to fall through to the
+  // sitewide defaults in src/lib/seo.ts. The edge middleware serves those same
+  // defaults for "/" (functions/_lib/seoMeta.ts, STATIC_PAGES), so overriding
+  // them here would mean a crawler and a browser saw two different homepage
+  // descriptions for the same URL.
+  useDocumentMeta({})
 
   const { settings, faqs } = useSiteSettings()
   useFaqJsonLd(faqs, '/')
@@ -113,8 +115,11 @@ export default function HomePage() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <span className="eyebrow">Featured</span>
-            <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Best-selling peptides</h2>
-            <p className="mt-1.5 text-sm text-ink-600">A selection of our most popular peptide skincare products.</p>
+            <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Where to start</h2>
+            <p className="mt-1.5 text-sm text-ink-600">
+              The products most people build a peptide routine around — a cleanser, a serum, and something for day and
+              night.
+            </p>
           </div>
           <ButtonLink to="/shop" variant="outline" size="sm" className="hidden sm:inline-flex">
             View all
@@ -204,6 +209,125 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------
+          Peptides, explained.
+
+          This section exists for two audiences at once. Customers arriving
+          from a search like "what are peptides in skincare" get a straight
+          answer instead of a product grid, and AI answer engines get a clean,
+          self-contained, quotable explanation attributed to this site — which
+          is how a small retailer gets cited in an AI answer at all. The third
+          question is the important one commercially and legally: it draws the
+          line between what Avernic UK sells and the injectable research
+          peptides people often mean when they search the word.
+      ------------------------------------------------------------------- */}
+      <section className="container-page py-16 sm:py-20">
+        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+          <div>
+            <span className="eyebrow">The basics</span>
+            <h2 className="mt-3 font-display text-2xl font-semibold text-ink-950 sm:text-3xl">
+              Peptides, explained plainly
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-ink-600">
+              Peptide skincare is worth understanding before you buy it. Here is the short version, without the
+              marketing.
+            </p>
+            <ButtonLink to="/faq" variant="outline" size="sm" className="mt-6">
+              More questions
+            </ButtonLink>
+          </div>
+
+          <dl className="space-y-8">
+            <div>
+              <dt className="font-display text-base font-semibold text-ink-950">What is a peptide?</dt>
+              <dd className="mt-2 text-sm leading-relaxed text-ink-600">
+                A peptide is a short chain of amino acids — the same building blocks that make up proteins, just far
+                fewer of them. Collagen and elastin, the proteins that give skin its structure, are themselves built
+                from amino acids. Cosmetic peptides are short synthetic or hydrolysed chains chosen because they are
+                small enough to be formulated into a stable, well-tolerated skincare product.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-display text-base font-semibold text-ink-950">What do they do in skincare?</dt>
+              <dd className="mt-2 text-sm leading-relaxed text-ink-600">
+                Applied topically, peptides are used in cosmetic formulations to support the appearance of firmness,
+                smoothness and evenness — the look of the skin surface. Different peptides are chosen for different
+                cosmetic purposes: signal peptides such as Matrixyl 3000 for the look of firmness, Argireline and
+                Snap-8 for the appearance of expression lines, copper peptides for overall tone and texture. Results
+                are gradual and appearance-based; most formulations are used daily over several weeks.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-display text-base font-semibold text-ink-950">
+                Are these the same as injectable peptides?
+              </dt>
+              <dd className="mt-2 text-sm leading-relaxed text-ink-600">
+                No — and this is the distinction that matters most. Everything Avernic UK sells is a cosmetic skincare
+                product applied to the surface of the skin. We do not sell, and will not sell, injectable peptides,
+                research peptides, or any peptide product intended for internal use. Those are an entirely separate
+                category, they are not cosmetics, and they are not something a skincare retailer should be supplying.
+                If that is what you are looking for, this is not the right shop.
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------
+          Delivery, returns and payment reassurance. Reads live from Admin →
+          Settings rather than hardcoded copy, so the prices quoted here can
+          never drift from what the basket actually charges.
+      ------------------------------------------------------------------- */}
+      <section className="border-y border-ink-200/60 bg-ink-50/60 dark:bg-ink-50/40">
+        <div className="container-page py-12 sm:py-14">
+          <dl className="grid gap-8 sm:grid-cols-3">
+            {[
+              {
+                title: 'Royal Mail delivery',
+                body: (
+                  <>
+                    {formatGBP(settings.deliveryStandardMinor)} 48hr Tracked, or{' '}
+                    {formatGBP(settings.deliveryExpressMinor)} 24hr Tracked &amp; Signed. Free 48hr Tracked over{' '}
+                    {formatGBP(settings.deliveryFreeThresholdMinor)}. UK addresses only.
+                  </>
+                ),
+                icon: 'M4 17V7a1 1 0 0 1 1-1h9v11M4 17h1m0 0h9m0 0h2m0 0h1a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.29-.7L18.5 9.4a1 1 0 0 0-.7-.3H14M4 17a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0',
+              },
+              {
+                title: '14 days to change your mind',
+                body: (
+                  <>
+                    Cancel within 14 days of delivery, without giving a reason — your statutory right as a UK online
+                    customer. See our returns page for how to start one.
+                  </>
+                ),
+                icon: 'M3 12a9 9 0 1 0 2.64-6.36M3 4v5h5',
+              },
+              {
+                title: 'Paid straight from your bank',
+                body: (
+                  <>
+                    Checkout is Open Banking, powered by Fena. You approve the payment in your own banking app — we
+                    never see, handle or store card details.
+                  </>
+                ),
+                icon: 'M12 3 4 6.5V11c0 4.6 3.2 8.5 8 10 4.8-1.5 8-5.4 8-10V6.5L12 3Zm-2.5 8.5 2 2 4-4',
+              },
+            ].map((item) => (
+              <div key={item.title} className="flex gap-4">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="mt-0.5 h-6 w-6 shrink-0 text-accent-500">
+                  <path d={item.icon} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div>
+                  <dt className="text-sm font-semibold text-ink-950">{item.title}</dt>
+                  <dd className="mt-1.5 text-sm leading-relaxed text-ink-600">{item.body}</dd>
+                </div>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 

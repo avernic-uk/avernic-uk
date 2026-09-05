@@ -126,7 +126,7 @@ function customerConfirmationHtml(order: OrderForEmail): string {
     </p>
     <h2 style="font-size:14px;margin:28px 0 8px;color:#101014;">Need help?</h2>
     <p style="font-size:14px;color:#474854;line-height:1.6;">
-      Contact us via the Contact page on avernic.co.uk and quote your order number.
+      Contact us via the Contact page on avernic.uk and quote your order number.
     </p>
     `,
   )

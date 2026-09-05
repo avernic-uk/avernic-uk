@@ -58,7 +58,7 @@ function absolutise(site: string, url: string): string {
  * on product URLs so product photography can also surface in image search.
  */
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const siteUrl = (context.env.SITE_URL || 'https://www.avernic.co.uk').replace(/\/+$/, '')
+  const siteUrl = (context.env.SITE_URL || 'https://avernic.uk').replace(/\/+$/, '')
   let products: ProductRow[] = []
   let categories: CategoryRow[] = []
 

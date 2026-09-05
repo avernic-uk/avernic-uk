@@ -3,6 +3,7 @@ import { Header } from './Header'
 import { Footer } from './Footer'
 import { AgeNotice } from './AgeNotice'
 import { CookieConsentBanner } from '@/components/cookies/CookieConsentBanner'
+import { usePageViewTracking } from '@/lib/analytics/usePageViewTracking'
 import { useJsonLd } from '@/lib/useJsonLd'
 import { useMemo } from 'react'
 import { absoluteUrl, siteUrl, parseSocialLinks, SITE_NAME } from '@/lib/seo'
@@ -10,6 +11,7 @@ import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 
 export function Layout({ children }: { children: ReactNode }) {
   const { settings } = useSiteSettings()
+  usePageViewTracking()
 
   // Site-wide entities: the store itself and the site's search box, enriched
   // with the admin-editable business details (Admin → Settings) so this

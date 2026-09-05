@@ -1,7 +1,7 @@
 export const SITE_NAME = 'Avernic UK'
 export const DEFAULT_TITLE = 'Avernic UK — Peptide skincare, made simpler.'
 export const DEFAULT_DESCRIPTION =
-  'Avernic UK: cosmetic peptide skincare — serums, moisturisers and treatments — delivered across the UK with secure Open Banking payment. Skincare only; not medicines. 18+.'
+  'Cosmetic peptide skincare from Avernic UK — serums, moisturisers, eye care and treatments, HPLC-tested for purity. UK delivery, Open Banking checkout. 18+.'
 export const DEFAULT_OG_IMAGE_PATH = '/logo-lockup.png'
 
 /**
@@ -11,7 +11,7 @@ export const DEFAULT_OG_IMAGE_PATH = '/logo-lockup.png'
  */
 export function siteUrl(): string {
   const configured = (import.meta.env.VITE_SITE_URL as string | undefined)?.trim()
-  const base = configured || (typeof window !== 'undefined' ? window.location.origin : 'https://www.avernic.co.uk')
+  const base = configured || (typeof window !== 'undefined' ? window.location.origin : 'https://avernic.uk')
   return base.replace(/\/+$/, '')
 }
 

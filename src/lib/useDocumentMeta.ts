@@ -3,8 +3,13 @@ import { useLocation } from 'react-router-dom'
 import { absoluteUrl, canonicalPath, DEFAULT_OG_IMAGE_PATH, SITE_NAME } from './seo'
 
 export interface DocumentMeta {
-  /** Page title; " | Avernic UK" is appended automatically. */
-  title: string
+  /**
+   * Page title; " | Avernic UK" is appended automatically. Omit it on pages
+   * that should keep the sitewide default title — the homepage does this, so
+   * that the title a browser ends up showing matches the one the edge
+   * middleware already served to crawlers for the same URL.
+   */
+  title?: string
   description?: string
   /**
    * Canonical path for this page (e.g. "/product/foo"). Defaults to the
@@ -35,7 +40,9 @@ export function useDocumentMeta({ title, description, path, image, type = 'websi
   const pathname = location.pathname
 
   useEffect(() => {
-    const fullTitle = `${title} | ${SITE_NAME}`
+    // undefined means "leave the title alone" — `set` below skips undefined
+    // values, and document.title is only touched inside the same guard.
+    const fullTitle = title === undefined ? undefined : `${title} | ${SITE_NAME}`
     const url = absoluteUrl(path ? canonicalPath(path) : canonicalPath(pathname))
     const imageUrl = absoluteUrl(image || DEFAULT_OG_IMAGE_PATH)
 
@@ -53,11 +60,13 @@ export function useDocumentMeta({ title, description, path, image, type = 'websi
       })
     }
 
-    const previousTitle = document.title
-    document.title = fullTitle
-    previous.push(() => {
-      document.title = previousTitle
-    })
+    if (fullTitle !== undefined) {
+      const previousTitle = document.title
+      document.title = fullTitle
+      previous.push(() => {
+        document.title = previousTitle
+      })
+    }
 
     set('description', 'content', description)
     set('robots', 'content', noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')

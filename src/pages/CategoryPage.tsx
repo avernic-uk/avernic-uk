@@ -15,7 +15,13 @@ export default function CategoryPage() {
 
   useDocumentMeta({
     title: category ? category.name : 'Category',
-    description: category?.description ?? undefined,
+    // Falls back to the same sentence the edge middleware builds for a
+    // category with no description of its own (functions/_lib/seoMeta.ts), so
+    // a crawler and a browser never see two different descriptions for one URL.
+    description: category
+      ? category.description ||
+        `Shop ${category.name.toLowerCase()} at Avernic UK — cosmetic peptide skincare, HPLC-tested, with UK delivery and Open Banking checkout.`
+      : undefined,
   })
 
   useEffect(() => {

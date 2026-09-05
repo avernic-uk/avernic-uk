@@ -32,6 +32,7 @@ import AccountOrderDetailPage from '@/pages/account/AccountOrderDetailPage'
 
 import AdminLayout from '@/pages/admin/AdminLayout'
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
+import AdminAnalyticsPage from '@/pages/admin/AdminAnalyticsPage'
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage'
 import AdminOrderDetailPage from '@/pages/admin/AdminOrderDetailPage'
 import AdminProductsPage from '@/pages/admin/AdminProductsPage'
@@ -54,6 +55,7 @@ export default function App() {
         }
       >
         <Route index element={<AdminDashboardPage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
         <Route path="orders/:id" element={<AdminOrderDetailPage />} />
         <Route path="products" element={<AdminProductsPage />} />
