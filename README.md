@@ -43,7 +43,8 @@ used by `functions/`). Summary:
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Server only | Full-access DB client for `functions/` — **never** expose to the browser |
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Server only | Transactional email sending |
 | `ADMIN_NOTIFICATION_EMAIL` | Server only | Where new-order and contact-form notifications go |
-| `FENA_INTEGRATION_ID`, `FENA_SECRET_KEY`, `FENA_BANK_ACCOUNT_ID` | Server only | Fena Open Banking credentials — see below |
+| `FENA_INTEGRATION_ID`, `FENA_SECRET_KEY` | Server only | Fena Open Banking credentials — see below |
+| `FENA_BANK_ACCOUNT_ID` | Server only | Optional; only needed with more than one bank account connected |
 | `FENA_API_BASE_URL` | Server only | Optional override; defaults to Fena's production API |
 | `FENA_WEBHOOK_SHARED_SECRET` | Server only | Optional; guards the Fena webhook endpoint against noise, see below |
 | `SITE_URL` / `VITE_SITE_URL` | Both | Used to build absolute links (emails, sitemap, Fena redirect URL) |
@@ -103,8 +104,10 @@ does not trust the webhook body. See the full explanation in `functions/_lib/fen
 
 **What you need to provide** (from the Fena dashboard: Settings → API keys → Generate API Key,
 role "Owner"/"Partner Integration"): the generated Terminal ID/Terminal Secret pair (→
-`FENA_INTEGRATION_ID` / `FENA_SECRET_KEY`), and the receiving bank account you select there (→
-`FENA_BANK_ACCOUNT_ID`). When generating the key, set the "Payment notification URL" to
+`FENA_INTEGRATION_ID` / `FENA_SECRET_KEY`). `FENA_BANK_ACCOUNT_ID` can be left unset — confirmed
+with a real live test call that when omitted, Fena uses the terminal's one connected bank account
+automatically; only set it if a second account is ever connected and a non-default one is needed.
+When generating the key, set the "Payment notification URL" to
 `https://<your-domain>/api/payments/fena/webhook` (optionally with `?key=<a random secret>`,
 matched against `FENA_WEBHOOK_SHARED_SECRET`, to keep random traffic off that endpoint) and the
 redirect URL can be left as whatever Fena requires — the actual per-order redirect is set
@@ -232,10 +235,10 @@ This is **not** production-ready as-is. Outstanding, in priority order:
 1. **Run `npm install` and fix whatever `npm run typecheck` / `npm run build` surface** — this
    codebase has not been compiled or executed anywhere yet (see Testing above).
 2. **Fena Open Banking** — implemented against Fena's published SDK (see Fena integration status
-   above), but not yet exercised with a real payment. Get real `FENA_INTEGRATION_ID` /
-   `FENA_SECRET_KEY` / `FENA_BANK_ACCOUNT_ID` from the Fena dashboard, set them as Cloudflare
-   Secrets, and run a real (small, refundable) payment end-to-end before trusting this in
-   production — in particular to confirm the exact status strings Fena returns.
+   above); a real live diagnostic call has confirmed the create-payment endpoint, request/response
+   shape, and default bank account selection. Not yet confirmed: the exact status strings this
+   payment type returns as it moves through its lifecycle, and the real webhook payload — both
+   worth watching on the first real customer payment.
 3. **Real business/legal details** — every `[placeholder]` in the footer, About, Contact, Terms,
    Privacy, Cookies, Delivery and Returns pages needs the real company name, registration number,
    registered address, contact details, and reviewed legal text (ideally by a solicitor).

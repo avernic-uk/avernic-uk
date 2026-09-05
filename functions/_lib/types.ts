@@ -16,7 +16,8 @@ export interface Env {
   FENA_API_BASE_URL: string
   FENA_INTEGRATION_ID: string
   FENA_SECRET_KEY: string
-  FENA_BANK_ACCOUNT_ID: string
+  /** Optional — only needed if more than one bank account is ever connected; Fena defaults to one automatically otherwise. */
+  FENA_BANK_ACCOUNT_ID?: string
   FENA_WEBHOOK_SHARED_SECRET: string
   SITE_URL: string
 }

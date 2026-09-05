@@ -34,9 +34,12 @@ import type { Env } from './types'
 //     rather than reusing the order number.
 //   - `amount` is a decimal string with exactly two places, e.g. "18.92" —
 //     NOT minor units.
-//   - `bankAccount` is Avernic UK's OWN receiving bank account id as
-//     registered in the Fena dashboard (Settings) — not anything about the
-//     customer's bank. It has to be copied in as FENA_BANK_ACCOUNT_ID.
+//   - `bankAccount` is OPTIONAL — confirmed with a real live test call: when
+//     omitted, Fena uses the terminal's default receiving bank account (the
+//     response echoes it back as a full object with `isDefault: true`). It
+//     only needs to be set (FENA_BANK_ACCOUNT_ID) if Avernic UK ever has more
+//     than one bank account connected to this terminal and needs to pick a
+//     non-default one.
 //   - Terminal ID / Terminal Secret (shown when generating an API key in the
 //     Fena dashboard: Settings -> API keys -> Generate API Key) are the same
 //     credential pair as `integration-id` / `secret-key` above.
@@ -69,14 +72,14 @@ const DEFAULT_BASE_URL = 'https://epos.api.prod-gcp.fena.co'
 export class FenaNotConfiguredError extends Error {
   constructor() {
     super(
-      'Fena Open Banking is not yet configured for this environment. Set FENA_INTEGRATION_ID, ' +
-        'FENA_SECRET_KEY and FENA_BANK_ACCOUNT_ID from the Fena dashboard (Settings -> API keys).',
+      'Fena Open Banking is not yet configured for this environment. Set FENA_INTEGRATION_ID and ' +
+        'FENA_SECRET_KEY from the Fena dashboard (Settings -> API keys).',
     )
   }
 }
 
 function isFenaConfigured(env: Env): boolean {
-  return Boolean(env.FENA_INTEGRATION_ID && env.FENA_SECRET_KEY && env.FENA_BANK_ACCOUNT_ID)
+  return Boolean(env.FENA_INTEGRATION_ID && env.FENA_SECRET_KEY)
 }
 
 function baseUrl(env: Env): string {
@@ -132,7 +135,10 @@ export async function createFenaPayment(env: Env, req: CreateFenaPaymentRequest)
     body: JSON.stringify({
       reference: req.reference,
       amount: toFenaAmount(req.amountMinor),
-      bankAccount: env.FENA_BANK_ACCOUNT_ID,
+      // Omitted when not set — Fena falls back to the terminal's default
+      // bank account (confirmed with a real test call). Only set
+      // FENA_BANK_ACCOUNT_ID if a specific non-default account is needed.
+      ...(env.FENA_BANK_ACCOUNT_ID ? { bankAccount: env.FENA_BANK_ACCOUNT_ID } : {}),
       customerEmail: req.customerEmail ?? '',
       customerName: req.customerName ?? '',
       items: [],
