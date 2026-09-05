@@ -458,8 +458,8 @@ export default function ProductPage() {
             )}
 
             <p className="text-xs leading-relaxed text-ink-500">
-              Cosmetic skincare for topical use only. Not a medicine, and not for injection or internal use. For adults
-              aged 18 and over. Patch test before first use, and discontinue use if irritation occurs.
+              Not a medicine, and not for injection or internal use. For Laboratory research purposes only. Adults
+              aged 18 and over.
             </p>
           </aside>
         </div>
