@@ -8,6 +8,7 @@ import { useState } from 'react'
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useBasket()
   const [justAdded, setJustAdded] = useState(false)
+  const [imageBroken, setImageBroken] = useState(false)
   const outOfStock = product.stockQuantity <= 0
 
   function handleAdd() {
@@ -19,12 +20,20 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-ink-200/70 bg-white shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-accent-500/40 hover:shadow-card-hover dark:bg-ink-50 dark:hover:shadow-glow-sm">
       <Link to={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-ink-100/70">
-        <img
-          src={product.imageUrl}
-          alt=""
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
-        />
+        {product.imageUrl && !imageBroken ? (
+          <img
+            src={product.imageUrl}
+            alt=""
+            loading="lazy"
+            onError={() => setImageBroken(true)}
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+          />
+        ) : (
+          // No photo yet (or the URL is broken): a quiet brand placeholder instead of a broken-image icon
+          <span className="flex h-full w-full items-center justify-center">
+            <img src="/logo-icon.png" alt="" className="h-1/3 w-auto opacity-30 grayscale" />
+          </span>
+        )}
         {/* Soft vignette so light product photography sits comfortably on a dark card */}
         <span
           aria-hidden="true"

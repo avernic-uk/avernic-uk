@@ -77,10 +77,12 @@ function rewrite(response: Response, meta: PageMeta, site: string): Response {
   if (meta.jsonLd) rewriter = rewriter.on('head', new AppendJsonLd(jsonForScript(meta.jsonLd)))
 
   const transformed = rewriter.transform(response)
-  if (meta.status === response.status) return transformed
-
-  const headers = new Headers(transformed.headers)
-  return new Response(transformed.body, { status: meta.status, headers })
+  // Re-wrap so headers are mutable and the status can be overridden (404 for unknown slugs).
+  return new Response(transformed.body, {
+    status: meta.status,
+    statusText: meta.status === 404 ? 'Not Found' : transformed.statusText,
+    headers: new Headers(transformed.headers),
+  })
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -96,9 +98,17 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   try {
     const meta = await resolvePageMeta(env, url)
     const site = (env.SITE_URL || url.origin).replace(/\/+$/, '')
-    return rewrite(response, meta, site)
-  } catch {
-    // Never let SEO decoration take the site down.
-    return response
+    const out = rewrite(response, meta, site)
+    // Diagnostic header (harmless to leave in): confirms the edge rewrite ran for this URL.
+    out.headers.set('x-seo-meta', `edge;status=${meta.status};noindex=${meta.noindex}`)
+    return out
+  } catch (err) {
+    // Never let SEO decoration take the site down — but say why it was skipped,
+    // in the logs and in a response header, so it can't fail silently.
+    const message = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
+    console.error('[seo middleware]', url.pathname, message)
+    const fallback = new Response(response.body, response)
+    fallback.headers.set('x-seo-meta', `skipped;${message.slice(0, 200).replace(/[\r\n]+/g, ' ')}`)
+    return fallback
   }
 }
