@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc -b --noEmit && tsc -p functions/tsconfig.json",
+    "typecheck:offline": "bash scripts/typecheck-offline.sh",
     "pages:dev": "wrangler pages dev -- npm run dev",
     "test": "vitest run"
   },

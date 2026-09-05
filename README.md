@@ -385,6 +385,23 @@ hue, so inventing one would look foreign.
 
 ## Testing
 
+### Typechecking without node_modules
+
+`npm run typecheck` needs `npm install`, which fails wherever the npm registry is unreachable. Use
+`npm run typecheck:offline` (or `bash scripts/typecheck-offline.sh`) there instead.
+
+**Do not fall back to `tsc --noResolve`.** It stops TypeScript following imports, so every type from
+another file silently becomes `any` and no cross-file error is reported at all. A required property
+added to a shared interface — `Faq.category` — passed a `--noResolve` check cleanly and then failed
+the Cloudflare build with five `TS2741` errors. The script runs the real project config so `@/*`
+resolves and cross-file checking actually happens, then filters only the errors that missing
+`@types` genuinely cause.
+
+It is a safety net, not a substitute for the real build: it cannot see prop-type mismatches against
+React components, or anything depending on a library's types. Cloudflare's build is still the
+authority.
+
+
 ```bash
 npm run typecheck   # tsc for both the Vite app and functions/
 npm run lint
