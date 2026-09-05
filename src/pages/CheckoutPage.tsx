@@ -97,7 +97,7 @@ export default function CheckoutPage() {
         return
       }
 
-      // Order was created either way (502 = order saved, Fano unavailable).
+      // Order was created either way (502 = order saved, Fena unavailable).
       window.sessionStorage.setItem('avernic_last_order', JSON.stringify({ orderNumber: data.orderNumber, email: form.email }))
 
       if (data.payment?.redirectUrl) {
@@ -106,7 +106,7 @@ export default function CheckoutPage() {
         return
       }
 
-      // Fano not available in this environment — still land on confirmation,
+      // Fena not available in this environment — still land on confirmation,
       // which will show the order as pending payment, and surface the message.
       clear()
       navigate(`/order-confirmation/${data.orderNumber}?notice=${encodeURIComponent(data.error ?? '')}`)
@@ -232,7 +232,7 @@ export default function CheckoutPage() {
               Payment
             </h2>
             <p className="mt-3 rounded-xl border border-ink-200 bg-ink-50 p-4 text-sm text-ink-700">
-              Payment is completed securely via Open Banking, powered by Fano. After placing your
+              Payment is completed securely via Open Banking, powered by Fena. After placing your
               order you'll be taken to your bank to authorise payment directly — we never see or
               store your banking details.
             </p>

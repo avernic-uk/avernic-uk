@@ -94,7 +94,7 @@ export interface Order {
   deliveryMinor: number
   totalMinor: number
   currency: 'GBP'
-  fanoPaymentReference: string | null
+  fenaPaymentReference: string | null
   paymentStatus: PaymentStatus
   orderStatus: OrderStatus
   createdAt: string

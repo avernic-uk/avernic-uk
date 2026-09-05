@@ -26,7 +26,7 @@ SUPABASE_URL = "https://olgcumyhyfyjaeevqowx.supabase.co"
 RESEND_FROM_EMAIL = "orders@avernic.uk"
 ADMIN_NOTIFICATION_EMAIL = "harview@gmx.com"
 
-# Secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, FANO_*, etc.) are NOT
+# Secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, FENA_*, etc.) are NOT
 # set here — they must never be committed. RESEND_API_KEY in particular is
 # NOT added above on purpose, even though you shared it in chat — it's a
 # real secret (it can send email as your domain), and this file is

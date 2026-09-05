@@ -25,7 +25,7 @@ export default function TermsPage() {
 
       <h2 className="text-lg font-semibold text-ink-900">3. Payment</h2>
       <p>
-        Payment is completed via Open Banking, powered by Fano. By placing an order you authorise
+        Payment is completed via Open Banking, powered by Fena. By placing an order you authorise
         Avernic UK to take payment for the total amount shown at checkout via this method.
       </p>
 

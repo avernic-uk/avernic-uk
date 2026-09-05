@@ -20,7 +20,7 @@ export default function PrivacyPage() {
       <p>
         When you place an order or create an account, we collect your name, email address,
         telephone number, and delivery address. We do not collect or store your banking or card
-        details — payment is handled entirely by Fano's Open Banking service.
+        details — payment is handled entirely by Fena's Open Banking service.
       </p>
 
       <h2 className="text-lg font-semibold text-ink-900">3. How we use your data</h2>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
       <h2 className="text-lg font-semibold text-ink-900">4. Who we share your data with</h2>
       <p>
         We share the minimum necessary data with: Supabase (our database and authentication
-        provider), Fano (payment processing via Open Banking), Resend (transactional email
+        provider), Fena (payment processing via Open Banking), Resend (transactional email
         delivery), and Cloudflare (website hosting). We do not sell your personal data.
       </p>
 

@@ -16,7 +16,7 @@ const homeFaqs = [
   },
   {
     question: 'How do I pay?',
-    answer: 'Checkout is completed securely via Open Banking, powered by Fano. You authorise payment directly from your own bank — we never see or store your banking details.',
+    answer: 'Checkout is completed securely via Open Banking, powered by Fena. You authorise payment directly from your own bank — we never see or store your banking details.',
   },
   {
     question: 'How long does delivery take?',
@@ -31,7 +31,7 @@ const homeFaqs = [
 const steps = [
   { title: 'Choose your products', description: 'Browse our range and add what you need to your basket.' },
   { title: 'Complete checkout', description: 'Enter your UK delivery address and contact details.' },
-  { title: 'Pay securely with Open Banking', description: 'Authorise payment directly from your bank via Fano — no card details to enter.' },
+  { title: 'Pay securely with Open Banking', description: 'Authorise payment directly from your bank via Fena — no card details to enter.' },
   { title: 'We process your order', description: 'You will receive an order confirmation email, and we get your order ready to send.' },
 ]
 

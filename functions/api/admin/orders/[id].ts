@@ -14,8 +14,9 @@ const VALID_ORDER_STATUSES: OrderStatus[] = [
 ]
 
 // Admins may only move payment status to these values manually (e.g. after
-// processing a refund outside Fano, or cancelling an unpaid order). Moving
-// a payment TO 'paid' must only ever happen via the verified Fano webhook.
+// processing a refund outside Fena, or cancelling an unpaid order). Moving
+// a payment TO 'paid' must only ever happen via this server's own verified
+// check against Fena's API (see functions/_lib/paymentReconciliation.ts).
 const ADMIN_SETTABLE_PAYMENT_STATUSES: PaymentStatus[] = ['cancelled', 'refunded']
 
 /** GET /api/admin/orders/:id — full order detail. Admin-only. */

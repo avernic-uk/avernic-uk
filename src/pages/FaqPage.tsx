@@ -12,8 +12,8 @@ const faqSections: { heading: string; items: { question: string; answer: string 
   {
     heading: 'Payment',
     items: [
-      { question: 'How do I pay?', answer: 'Checkout is completed securely via Open Banking, powered by Fano. You authorise payment directly from your own bank account — no card details are entered on our site.' },
-      { question: 'Is my payment information safe?', answer: 'We never see or store your banking details. Payment is handled entirely by Fano’s Open Banking service, and your bank’s own security is used to authorise payment.' },
+      { question: 'How do I pay?', answer: 'Checkout is completed securely via Open Banking, powered by Fena. You authorise payment directly from your own bank account — no card details are entered on our site.' },
+      { question: 'Is my payment information safe?', answer: 'We never see or store your banking details. Payment is handled entirely by Fena’s Open Banking service, and your bank’s own security is used to authorise payment.' },
     ],
   },
   {

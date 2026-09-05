@@ -19,7 +19,7 @@ interface OrderDetail {
   total_minor: number
   payment_status: string
   order_status: string
-  fano_payment_reference: string | null
+  fena_payment_reference: string | null
   internal_notes: string | null
   created_at: string
   updated_at: string
@@ -235,10 +235,10 @@ export default function AdminOrderDetailPage() {
               {order.delivery_address.country}
             </p>
 
-            {order.fano_payment_reference && (
+            {order.fena_payment_reference && (
               <>
                 <h2 className="mt-6 text-sm font-semibold text-ink-900">Payment reference</h2>
-                <p className="mt-2 break-all font-mono text-xs text-ink-600">{order.fano_payment_reference}</p>
+                <p className="mt-2 break-all font-mono text-xs text-ink-600">{order.fena_payment_reference}</p>
               </>
             )}
           </div>

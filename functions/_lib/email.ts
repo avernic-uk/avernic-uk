@@ -186,7 +186,7 @@ export async function sendViaResend(env: Env, to: string, subject: string, html:
  * Sends both the customer confirmation and business notification emails for
  * an order that has JUST become verified-paid, idempotently. Each email
  * type is recorded in email_events (order_id, email_type) with a unique
- * index — a duplicate call (e.g. a retried/duplicate Fano webhook) will
+ * index — a duplicate call (e.g. a retried/duplicate Fena webhook) will
  * fail the insert for an already-sent type and simply skip re-sending it,
  * rather than sending twice.
  */

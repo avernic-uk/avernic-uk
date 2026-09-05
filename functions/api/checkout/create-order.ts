@@ -2,7 +2,7 @@ import { getSupabaseAdmin } from '../../_lib/supabaseAdmin'
 import { priceBasket } from '../../_lib/pricing'
 import { isValidUKPostcode, normaliseUKPostcode } from '../../_lib/postcode'
 import { generateOrderNumber } from '../../_lib/orderNumber'
-import { createFanoPayment, FanoNotConfiguredError } from '../../_lib/fano'
+import { createFenaPayment, generateFenaReference, FenaNotConfiguredError } from '../../_lib/fena'
 import { getAuthedUserId } from '../../_lib/auth'
 import { json, errorResponse, ApiError } from '../../_lib/respond'
 import type { Env, BasketLine, Address } from '../../_lib/types'
@@ -55,12 +55,14 @@ function validate(body: CreateOrderBody): string[] {
  *   2. Re-price the basket server-side (never trust client prices/totals).
  *   3. Reject if the basket has any availability/stock issues.
  *   4. Create a pending_payment order + order_items (frozen unit prices).
- *   5. Attempt to create a Fano Open Banking payment for the order total.
- *   6. Return the order + (if available) the Fano redirect URL.
+ *   5. Attempt to create a Fena Open Banking payment for the order total.
+ *   6. Return the order + (if available) the Fena redirect URL.
  *
  * Payment success is NEVER assumed here — the order is created as
- * pending_payment/pending and is only ever moved to paid by the verified
- * Fano webhook handler (functions/api/payments/fano/webhook.ts).
+ * pending_payment/pending and is only ever moved to paid once this server
+ * itself confirms it directly against Fena's API (see
+ * functions/_lib/paymentReconciliation.ts) — never from a client redirect
+ * or webhook body alone.
  */
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
@@ -139,44 +141,48 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       throw new ApiError(500, 'Could not create your order. Please try again.')
     }
 
-    // Attempt to create the Fano payment. If Fano isn't configured yet, the
+    // Attempt to create the Fena payment. If Fena isn't configured yet, the
     // order still exists (pending_payment) — we tell the customer payment
-    // isn't available rather than pretending it succeeded.
+    // isn't available rather than pretending it succeeded. Fena's
+    // `reference` field is capped at 12 chars, shorter than our own order
+    // numbers, so a separate short reference is generated per attempt.
+    const fenaReference = generateFenaReference()
     try {
-      const payment = await createFanoPayment(context.env, {
-        reference: orderRow.order_number,
+      const payment = await createFenaPayment(context.env, {
+        reference: fenaReference,
         amountMinor: priced.totalMinor,
-        currency: 'GBP',
-        description: `Avernic UK order ${orderRow.order_number}`,
-        returnUrl: `${context.env.SITE_URL}/order-confirmation/${orderRow.order_number}`,
-        cancelUrl: `${context.env.SITE_URL}/checkout`,
+        customerEmail: body.customer.email.trim().toLowerCase(),
+        customerName: body.customer.fullName.trim(),
+        customRedirectUrl: `${context.env.SITE_URL}/order-confirmation/${orderRow.order_number}`,
       })
 
       await supabase.from('payments').insert({
         order_id: orderRow.id,
-        provider: 'fano',
-        provider_reference: payment.providerReference,
+        provider: 'fena',
+        provider_reference: fenaReference,
+        fena_hashed_id: payment.hashedId,
         status: 'pending',
         amount_minor: priced.totalMinor,
         currency: 'GBP',
+        raw_response: payment.raw as object,
       })
 
-      await supabase.from('orders').update({ fano_payment_reference: payment.providerReference }).eq('id', orderRow.id)
+      await supabase.from('orders').update({ fena_payment_reference: fenaReference }).eq('id', orderRow.id)
 
       return json({
         orderNumber: orderRow.order_number,
         totalMinor: priced.totalMinor,
         payment: { redirectUrl: payment.redirectUrl },
       })
-    } catch (fanoError) {
-      const notConfigured = fanoError instanceof FanoNotConfiguredError
+    } catch (fenaError) {
+      const notConfigured = fenaError instanceof FenaNotConfiguredError
       return json(
         {
           orderNumber: orderRow.order_number,
           totalMinor: priced.totalMinor,
           payment: null,
           error: notConfigured
-            ? 'Card/Open Banking payment is not yet available on this environment. Your order has been saved as pending payment — please contact us to complete payment, or try again once payment is configured.'
+            ? 'Open Banking payment is not yet available on this environment. Your order has been saved as pending payment — please contact us to complete payment, or try again once payment is configured.'
             : 'We could not start your Open Banking payment. Your order has been saved — please try again.',
         },
         { status: 502 },
