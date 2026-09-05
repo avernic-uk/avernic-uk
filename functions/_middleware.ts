@@ -35,10 +35,15 @@ function jsonForScript(value: unknown): string {
     .replace(/\u2029/g, '\\u2029')
 }
 
+// NOTE: the constructor param must NOT be named `text` — HTMLRewriter's
+// runtime checks every handler object for a `text` property and, if one
+// exists, requires it to be a function (its own text-node handler slot). A
+// plain string field named `text` collides with that and throws:
+// "Incorrect type for the 'text' field on 'ElementContentHandlers'".
 class SetText {
-  constructor(private text: string) {}
+  constructor(private value: string) {}
   element(el: Element) {
-    el.setInnerContent(this.text)
+    el.setInnerContent(this.value)
   }
 }
 
