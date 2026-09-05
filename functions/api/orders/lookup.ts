@@ -33,7 +33,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     let { data: order, error } = await supabase
       .from('orders')
       .select(
-        'id, order_number, email, telephone, delivery_address, subtotal_minor, delivery_minor, total_minor, currency, payment_status, order_status, created_at',
+        'id, order_number, email, telephone, delivery_address, subtotal_minor, delivery_minor, delivery_method, delivery_method_label, total_minor, currency, payment_status, order_status, created_at',
       )
       .eq('order_number', body.orderNumber.trim())
       .eq('email', body.email.trim().toLowerCase())
@@ -58,7 +58,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           const { data: refreshed } = await supabase
             .from('orders')
             .select(
-              'id, order_number, email, telephone, delivery_address, subtotal_minor, delivery_minor, total_minor, currency, payment_status, order_status, created_at',
+              'id, order_number, email, telephone, delivery_address, subtotal_minor, delivery_minor, delivery_method, delivery_method_label, total_minor, currency, payment_status, order_status, created_at',
             )
             .eq('id', order.id)
             .single()
@@ -90,6 +90,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       })),
       subtotalMinor: order.subtotal_minor,
       deliveryMinor: order.delivery_minor,
+      deliveryMethod: order.delivery_method,
+      deliveryMethodLabel: order.delivery_method_label,
       totalMinor: order.total_minor,
       currency: order.currency,
       paymentStatus: order.payment_status,

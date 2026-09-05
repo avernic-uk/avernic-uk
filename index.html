@@ -37,7 +37,7 @@
       data-seo="description"
       content="Avernic UK: cosmetic peptide skincare — serums, moisturisers and treatments — delivered across the UK with secure Open Banking payment. Skincare only; not medicines. 18+."
     />
-    <meta name="robots" data-seo="robots" content="index,follow,max-image-preview:large" />
+    <meta name="robots" data-seo="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <link rel="canonical" data-seo="canonical" href="https://www.avernic.co.uk/" />
 
     <meta property="og:type" data-seo="og:type" content="website" />
@@ -64,6 +64,8 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Speeds up the first Supabase request (products, categories, settings) on every page. -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
   </head>
   <body class="bg-white text-ink-900 antialiased">
     <div id="root"></div>

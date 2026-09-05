@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from '../../_lib/supabaseAdmin'
-import { priceBasket } from '../../_lib/pricing'
+import { priceBasket, isDeliveryMethod } from '../../_lib/pricing'
 import { isValidUKPostcode, normaliseUKPostcode } from '../../_lib/postcode'
 import { generateOrderNumber } from '../../_lib/orderNumber'
 import { createFenaPayment, generateFenaReference, FenaNotConfiguredError } from '../../_lib/fena'
@@ -21,6 +21,8 @@ interface CreateOrderBody {
     postcode: string
   }
   lines: BasketLine[]
+  /** Which Royal Mail shipping option the customer chose. Defaults to 'standard'. */
+  shippingMethod?: string
   consent: {
     termsAccepted: boolean
   }
@@ -76,8 +78,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const supabase = getSupabaseAdmin(context.env)
 
+    const shippingMethod = isDeliveryMethod(body.shippingMethod) ? body.shippingMethod : 'standard'
+
     // Re-price server-side — this is the only price/total the order will ever use.
-    const priced = await priceBasket(supabase, body.lines)
+    const priced = await priceBasket(supabase, body.lines, shippingMethod)
     if (priced.hasIssues || priced.lines.length === 0) {
       return json(
         {
@@ -112,6 +116,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         delivery_address: address,
         subtotal_minor: priced.subtotalMinor,
         delivery_minor: priced.deliveryMinor,
+        delivery_method: priced.deliveryMethod,
+        delivery_method_label: priced.deliveryMethodLabel,
         total_minor: priced.totalMinor,
         currency: 'GBP',
         payment_status: 'pending',

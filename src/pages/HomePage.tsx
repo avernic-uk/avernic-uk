@@ -6,6 +6,7 @@ import { CategoryCard } from '@/components/product/CategoryCard'
 import { Accordion } from '@/components/ui/Accordion'
 import { Alert } from '@/components/ui/Alert'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
+import { useFaqJsonLd } from '@/lib/useFaqJsonLd'
 import { getFeaturedProducts, getCategories } from '@/lib/api/products'
 import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 import type { Product, ProductCategory } from '@/types'
@@ -25,6 +26,7 @@ export default function HomePage() {
   })
 
   const { settings, faqs } = useSiteSettings()
+  useFaqJsonLd(faqs, '/')
   const [featured, setFeatured] = useState<Product[] | null>(null)
   const [categories, setCategories] = useState<ProductCategory[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -90,7 +92,7 @@ export default function HomePage() {
             <div aria-hidden="true" className="absolute h-[22rem] w-[22rem] rounded-full border border-accent-500/15 sm:h-[28rem] sm:w-[28rem]" />
             <div aria-hidden="true" className="absolute h-[16rem] w-[16rem] rounded-full border border-accent-500/25 sm:h-[20rem] sm:w-[20rem]" />
             <img
-              src="/logo-icon.png"
+              src={settings.logoUrl || '/logo-icon.png'}
               alt=""
               className="relative h-64 w-auto animate-float drop-shadow-[0_24px_40px_rgb(var(--accent-500)/0.35)] sm:h-80"
             />

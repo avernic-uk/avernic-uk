@@ -92,6 +92,8 @@ export interface Order {
   items: OrderItem[]
   subtotalMinor: number
   deliveryMinor: number
+  deliveryMethod: DeliveryMethod
+  deliveryMethodLabel: string
   totalMinor: number
   currency: 'GBP'
   fenaPaymentReference: string | null
@@ -105,6 +107,9 @@ export interface BasketLine {
   productId: UUID
   quantity: number
 }
+
+/** Royal Mail shipping option chosen at checkout. */
+export type DeliveryMethod = 'standard' | 'express'
 
 /**
  * Cart contents kept client-side are ALWAYS re-priced server-side before
@@ -130,6 +135,8 @@ export interface PricedBasket {
   totalMinor: number
   currency: 'GBP'
   hasIssues: boolean
+  deliveryMethod: DeliveryMethod
+  deliveryMethodLabel: string
 }
 
 /** Admin-editable site content — see supabase/migrations/0003_admin_content.sql. */
@@ -139,11 +146,18 @@ export interface SiteSettings {
   registeredAddress: string
   contactEmail: string
   contactPhone: string
+  /** Royal Mail 48hr Tracked. */
   deliveryStandardMinor: number
+  /** Royal Mail 24hr Tracked & Signed — always charged, never covered by the free-delivery threshold. */
+  deliveryExpressMinor: number
   deliveryFreeThresholdMinor: number
   heroHeading: string
   heroSubheading: string
   ageNoticeText: string
+  /** Empty string means "use the site's default bundled logo". */
+  logoUrl: string
+  /** One social profile URL per line. Used as schema.org `sameAs`. */
+  socialLinks: string
 }
 
 export interface Faq {
@@ -152,4 +166,19 @@ export interface Faq {
   answer: string
   sortOrder: number
   isActive: boolean
+}
+
+/** A customer-submitted product review. Only ever fetched/shown once admin-approved. */
+export interface ProductReview {
+  id: UUID
+  customerName: string
+  rating: number
+  title: string
+  comment: string
+  createdAt: string
+}
+
+export interface ReviewSummary {
+  average: number
+  count: number
 }

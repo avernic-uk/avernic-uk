@@ -10,6 +10,7 @@ import { Button, ButtonLink } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 import { CheckoutSteps } from '@/components/checkout/CheckoutSteps'
 import { SecureCheckoutBadges } from '@/components/checkout/SecureCheckoutBadges'
+import { ShippingMethodPicker } from '@/components/checkout/ShippingMethodPicker'
 
 interface FormState {
   fullName: string
@@ -63,6 +64,15 @@ const sectionIcons = {
       strokeLinejoin="round"
     />
   ),
+  van: (
+    <path
+      d="M3 7h10v9H3V7Zm10 3h4l3 3v3h-2M13 16H8m9 0a2 2 0 1 1-4 0m4 0a2 2 0 0 1-4 0M8 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
 } as const
 
 function SectionCard({
@@ -91,7 +101,7 @@ function SectionCard({
 
 export default function CheckoutPage() {
   useDocumentMeta({ title: 'Checkout', noindex: true })
-  const { priced, lines, clear } = useBasket()
+  const { priced, lines, clear, shippingMethod, setShippingMethod } = useBasket()
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -143,6 +153,7 @@ export default function CheckoutPage() {
             postcode: form.postcode,
           },
           lines,
+          shippingMethod,
           consent: { termsAccepted: form.termsAccepted },
         }),
       })
@@ -212,9 +223,12 @@ export default function CheckoutPage() {
           <dt className="text-ink-600">Subtotal</dt>
           <dd className="text-ink-900">{formatGBP(priced.subtotalMinor)}</dd>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-ink-600">Delivery</dt>
-          <dd className="text-ink-900">{priced.deliveryMinor === 0 ? 'Free' : formatGBP(priced.deliveryMinor)}</dd>
+        <div className="flex justify-between gap-4">
+          <dt className="text-ink-600">
+            Delivery
+            {priced.deliveryMethodLabel && <span className="block text-xs text-ink-400">{priced.deliveryMethodLabel}</span>}
+          </dt>
+          <dd className="whitespace-nowrap text-ink-900">{priced.deliveryMinor === 0 ? 'Free' : formatGBP(priced.deliveryMinor)}</dd>
         </div>
         <div className="flex justify-between border-t border-ink-200 pt-3 text-base font-semibold">
           <dt className="text-ink-950">Total</dt>
@@ -337,6 +351,10 @@ export default function CheckoutPage() {
                 <p className="mt-1.5 text-xs text-ink-500">Avernic UK delivers to UK addresses only.</p>
               </div>
             </div>
+          </SectionCard>
+
+          <SectionCard icon="van" title="Delivery method">
+            <ShippingMethodPicker value={shippingMethod} onChange={setShippingMethod} subtotalMinor={priced.subtotalMinor} />
           </SectionCard>
 
           <SectionCard icon="shield" title="Payment">

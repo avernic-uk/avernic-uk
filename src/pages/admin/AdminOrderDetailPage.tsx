@@ -16,6 +16,8 @@ interface OrderDetail {
   delivery_address: { fullName: string; line1: string; line2: string | null; townCity: string; county: string | null; postcode: string; country: string }
   subtotal_minor: number
   delivery_minor: number
+  delivery_method: string
+  delivery_method_label: string
   total_minor: number
   payment_status: string
   order_status: string
@@ -151,9 +153,12 @@ export default function AdminOrderDetailPage() {
                 <dt className="text-ink-600">Subtotal</dt>
                 <dd>{formatGBP(order.subtotal_minor)}</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-ink-600">Delivery</dt>
-                <dd>{formatGBP(order.delivery_minor)}</dd>
+              <div className="flex justify-between gap-4">
+                <dt className="text-ink-600">
+                  Delivery
+                  {order.delivery_method_label && <span className="block text-xs text-ink-400">{order.delivery_method_label}</span>}
+                </dt>
+                <dd className="whitespace-nowrap">{formatGBP(order.delivery_minor)}</dd>
               </div>
               <div className="flex justify-between border-t border-ink-200 pt-2 text-base font-semibold">
                 <dt>Total</dt>

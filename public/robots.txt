@@ -1,3 +1,6 @@
+# Avernic UK — crawler access policy.
+# Default: allow indexing of everything except private/transactional routes.
+
 User-agent: *
 Allow: /
 Disallow: /api/
@@ -11,5 +14,49 @@ Disallow: /register
 Disallow: /forgot-password
 Disallow: /account/reset-password
 Disallow: /shop?*q=
+
+# --- AI answer-engine and AI-assistant crawlers -----------------------------
+# Explicitly allowed: this catalogue, FAQ content and business details are
+# meant to be readable and citable by AI search/answer engines (Google AI
+# Overviews, ChatGPT search, Perplexity, Copilot, Claude). See /llms.txt for
+# a purpose-built summary of the site for these agents.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
 
 Sitemap: https://www.avernic.co.uk/sitemap.xml

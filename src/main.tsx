@@ -6,6 +6,7 @@ import { AuthProvider } from './lib/auth/AuthProvider'
 import { BasketProvider } from './lib/basket/BasketProvider'
 import { ThemeProvider } from './lib/theme/ThemeProvider'
 import { SiteSettingsProvider } from './lib/settings/SiteSettingsProvider'
+import { CookieConsentProvider } from './lib/cookies/CookieConsentProvider'
 import './index.css'
 
 const rootEl = document.getElementById('root')
@@ -19,9 +20,11 @@ ReactDOM.createRoot(rootEl).render(
       <BrowserRouter>
         <AuthProvider>
           <SiteSettingsProvider>
-            <BasketProvider>
-              <App />
-            </BasketProvider>
+            <CookieConsentProvider>
+              <BasketProvider>
+                <App />
+              </BasketProvider>
+            </CookieConsentProvider>
           </SiteSettingsProvider>
         </AuthProvider>
       </BrowserRouter>

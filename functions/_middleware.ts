@@ -63,7 +63,7 @@ class AppendJsonLd {
 
 function rewrite(response: Response, meta: PageMeta, site: string): Response {
   const canonical = `${site}${meta.path === '/' ? '/' : meta.path}`
-  const robots = meta.noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large'
+  const robots = meta.noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'
 
   let rewriter = new HTMLRewriter()
     .on('title[data-seo="title"]', new SetText(meta.title))

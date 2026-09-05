@@ -100,9 +100,12 @@ export default function BasketPage() {
               <dt className="text-ink-600">Subtotal</dt>
               <dd className="text-ink-900">{formatGBP(priced?.subtotalMinor ?? 0)}</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-ink-600">Delivery</dt>
-              <dd className="text-ink-900">
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-600">
+                Delivery
+                {priced?.deliveryMethodLabel && <span className="block text-xs text-ink-400">{priced.deliveryMethodLabel}</span>}
+              </dt>
+              <dd className="whitespace-nowrap text-ink-900">
                 {(priced?.deliveryMinor ?? 0) === 0 ? 'Free' : formatGBP(priced?.deliveryMinor ?? 0)}
               </dd>
             </div>
@@ -121,7 +124,9 @@ export default function BasketPage() {
               Checkout
             </ButtonLink>
           )}
-          <p className="mt-3 text-center text-xs text-ink-500">UK delivery only. Prices in GBP, inclusive of VAT where applicable.</p>
+          <p className="mt-3 text-center text-xs text-ink-500">
+            UK delivery only. Choose Royal Mail 48hr Tracked or 24hr Tracked &amp; Signed at checkout.
+          </p>
           <div className="mt-5 border-t border-ink-200 pt-4">
             <SecureCheckoutBadges />
           </div>

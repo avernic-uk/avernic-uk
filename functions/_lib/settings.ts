@@ -13,11 +13,18 @@ export interface SiteSettings {
   registeredAddress: string
   contactEmail: string
   contactPhone: string
+  /** Royal Mail 48hr Tracked. */
   deliveryStandardMinor: number
+  /** Royal Mail 24hr Tracked & Signed — always charged, never covered by the free-delivery threshold. */
+  deliveryExpressMinor: number
   deliveryFreeThresholdMinor: number
   heroHeading: string
   heroSubheading: string
   ageNoticeText: string
+  /** Empty string means "use the site's default bundled logo". */
+  logoUrl: string
+  /** One social profile URL per line. Empty is fine — used as schema.org `sameAs`. */
+  socialLinks: string
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
@@ -26,12 +33,23 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   registeredAddress: '',
   contactEmail: '',
   contactPhone: '',
-  deliveryStandardMinor: 295,
+  deliveryStandardMinor: 525,
+  deliveryExpressMinor: 870,
   deliveryFreeThresholdMinor: 4000,
   heroHeading: 'Peptide skincare, made simpler.',
   heroSubheading:
     'Cosmetic peptide serums, moisturisers and treatments, chosen with care and delivered across the United Kingdom — with a straightforward checkout and secure Open Banking payment.',
   ageNoticeText: 'Our products are cosmetic skincare intended for adults aged 18 and over.',
+  logoUrl: '',
+  socialLinks: '',
+}
+
+/** Splits the newline-separated socialLinks field into a clean array of URLs. */
+export function parseSocialLinks(socialLinks: string): string[] {
+  return socialLinks
+    .split('\n')
+    .map((s) => s.trim())
+    .filter((s) => /^https?:\/\//i.test(s))
 }
 
 interface SettingsRow {
@@ -41,10 +59,13 @@ interface SettingsRow {
   contact_email: string
   contact_phone: string
   delivery_standard_minor: number
+  delivery_express_minor: number
   delivery_free_threshold_minor: number
   hero_heading: string
   hero_subheading: string
   age_notice_text: string
+  logo_url: string
+  social_links: string
 }
 
 function mapRow(row: SettingsRow): SiteSettings {
@@ -55,10 +76,13 @@ function mapRow(row: SettingsRow): SiteSettings {
     contactEmail: row.contact_email,
     contactPhone: row.contact_phone,
     deliveryStandardMinor: row.delivery_standard_minor,
+    deliveryExpressMinor: row.delivery_express_minor ?? DEFAULT_SITE_SETTINGS.deliveryExpressMinor,
     deliveryFreeThresholdMinor: row.delivery_free_threshold_minor,
     heroHeading: row.hero_heading,
     heroSubheading: row.hero_subheading,
     ageNoticeText: row.age_notice_text,
+    logoUrl: row.logo_url ?? '',
+    socialLinks: row.social_links ?? '',
   }
 }
 

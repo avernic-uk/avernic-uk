@@ -25,3 +25,11 @@ export function canonicalPath(pathname: string): string {
   const clean = pathname.replace(/[?#].*$/, '').replace(/\/+$/, '')
   return clean || '/'
 }
+
+/** Splits the admin-editable, newline-separated socialLinks setting into a clean array of URLs (schema.org `sameAs`). */
+export function parseSocialLinks(socialLinks: string): string[] {
+  return socialLinks
+    .split('\n')
+    .map((s) => s.trim())
+    .filter((s) => /^https?:\/\//i.test(s))
+}

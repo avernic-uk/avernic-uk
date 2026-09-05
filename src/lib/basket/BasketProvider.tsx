@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { BasketLine, PricedBasket } from '@/types'
+import type { BasketLine, DeliveryMethod, PricedBasket } from '@/types'
 
 const STORAGE_KEY = 'avernic_basket_v1'
+const SHIPPING_METHOD_STORAGE_KEY = 'avernic_shipping_method_v1'
 
 interface BasketContextValue {
   lines: BasketLine[]
@@ -15,6 +16,9 @@ interface BasketContextValue {
   pricing: boolean
   pricingError: string | null
   refreshPricing: () => Promise<void>
+  /** Which Royal Mail shipping option is currently selected (persisted across visits). */
+  shippingMethod: DeliveryMethod
+  setShippingMethod: (method: DeliveryMethod) => void
 }
 
 const BasketContext = createContext<BasketContextValue | undefined>(undefined)
@@ -35,8 +39,19 @@ function loadFromStorage(): BasketLine[] {
   }
 }
 
+function loadShippingMethod(): DeliveryMethod {
+  if (typeof window === 'undefined') return 'standard'
+  try {
+    const raw = window.localStorage.getItem(SHIPPING_METHOD_STORAGE_KEY)
+    return raw === 'express' ? 'express' : 'standard'
+  } catch {
+    return 'standard'
+  }
+}
+
 export function BasketProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<BasketLine[]>(() => loadFromStorage())
+  const [shippingMethod, setShippingMethodState] = useState<DeliveryMethod>(() => loadShippingMethod())
   const [priced, setPriced] = useState<PricedBasket | null>(null)
   const [pricing, setPricing] = useState(false)
   const [pricingError, setPricingError] = useState<string | null>(null)
@@ -45,9 +60,22 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines))
   }, [lines])
 
+  useEffect(() => {
+    window.localStorage.setItem(SHIPPING_METHOD_STORAGE_KEY, shippingMethod)
+  }, [shippingMethod])
+
   async function refreshPricing() {
     if (lines.length === 0) {
-      setPriced({ lines: [], subtotalMinor: 0, deliveryMinor: 0, totalMinor: 0, currency: 'GBP', hasIssues: false })
+      setPriced({
+        lines: [],
+        subtotalMinor: 0,
+        deliveryMinor: 0,
+        totalMinor: 0,
+        currency: 'GBP',
+        hasIssues: false,
+        deliveryMethod: shippingMethod,
+        deliveryMethodLabel: '',
+      })
       return
     }
     setPricing(true)
@@ -56,7 +84,7 @@ export function BasketProvider({ children }: { children: ReactNode }) {
       const res = await fetch('/api/basket/price', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lines }),
+        body: JSON.stringify({ lines, shippingMethod }),
       })
       if (!res.ok) throw new Error('Could not price your basket. Please try again.')
       const data = (await res.json()) as PricedBasket
@@ -81,11 +109,11 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Re-price whenever the basket's contents change.
+  // Re-price whenever the basket's contents or the chosen shipping method change.
   useEffect(() => {
     refreshPricing()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(lines)])
+  }, [JSON.stringify(lines), shippingMethod])
 
   const value = useMemo<BasketContextValue>(
     () => ({
@@ -119,8 +147,10 @@ export function BasketProvider({ children }: { children: ReactNode }) {
       pricing,
       pricingError,
       refreshPricing,
+      shippingMethod,
+      setShippingMethod: setShippingMethodState,
     }),
-    [lines, priced, pricing, pricingError],
+    [lines, priced, pricing, pricingError, shippingMethod],
   )
 
   return <BasketContext.Provider value={value}>{children}</BasketContext.Provider>

@@ -14,12 +14,15 @@ const DEFAULT_SETTINGS: SiteSettings = {
   registeredAddress: '',
   contactEmail: '',
   contactPhone: '',
-  deliveryStandardMinor: 295,
+  deliveryStandardMinor: 525,
+  deliveryExpressMinor: 870,
   deliveryFreeThresholdMinor: 4000,
   heroHeading: 'Peptide skincare, made simpler.',
   heroSubheading:
     'Cosmetic peptide serums, moisturisers and treatments, chosen with care and delivered across the United Kingdom — with a straightforward checkout and secure Open Banking payment.',
   ageNoticeText: 'Our products are cosmetic skincare intended for adults aged 18 and over.',
+  logoUrl: '',
+  socialLinks: '',
 }
 
 const DEFAULT_FAQS: Faq[] = [

@@ -39,6 +39,7 @@ import AdminProductFormPage from '@/pages/admin/AdminProductFormPage'
 import AdminCategoriesPage from '@/pages/admin/AdminCategoriesPage'
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage'
 import AdminFaqsPage from '@/pages/admin/AdminFaqsPage'
+import AdminReviewsPage from '@/pages/admin/AdminReviewsPage'
 
 export default function App() {
   return (
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="products/new" element={<AdminProductFormPage mode="create" />} />
         <Route path="products/:id" element={<AdminProductFormPage mode="edit" />} />
         <Route path="categories" element={<AdminCategoriesPage />} />
+        <Route path="reviews" element={<AdminReviewsPage />} />
         <Route path="faqs" element={<AdminFaqsPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>

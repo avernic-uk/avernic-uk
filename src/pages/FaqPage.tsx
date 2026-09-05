@@ -1,6 +1,8 @@
+import { useMemo } from 'react'
 import { InfoPageLayout } from '@/components/layout/InfoPageLayout'
 import { Accordion } from '@/components/ui/Accordion'
 import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
+import { useFaqJsonLd } from '@/lib/useFaqJsonLd'
 
 const faqSections: { heading: string; items: { question: string; answer: string }[] }[] = [
   {
@@ -34,6 +36,11 @@ const faqSections: { heading: string; items: { question: string; answer: string 
 
 export default function FaqPage() {
   const { faqs } = useSiteSettings()
+  const allQandA = useMemo(
+    () => [...faqs, ...faqSections.flatMap((section) => section.items)],
+    [faqs],
+  )
+  useFaqJsonLd(allQandA, '/faq')
   return (
     <InfoPageLayout title="Frequently asked questions" description="Answers to common questions about ordering, payment, delivery and returns at Avernic UK.">
       <div className="space-y-10">

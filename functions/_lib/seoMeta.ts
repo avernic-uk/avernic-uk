@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from './supabaseAdmin'
+import { getSiteSettings, parseSocialLinks } from './settings'
 import type { Env } from './types'
 
 // ============================================================================
@@ -96,20 +97,131 @@ function normalisePath(pathname: string): string {
   return clean || '/'
 }
 
-function base(env: Env, origin: string, path: string, page: StaticPage, status: 200 | 404 = 200): PageMeta {
+/** Wraps one or more schema.org nodes in a single @graph document, or omits jsonLd entirely if there's nothing to say. */
+function graph(...nodes: Array<Record<string, unknown> | null | undefined>): Record<string, unknown> | undefined {
+  const clean = nodes.filter((n): n is Record<string, unknown> => Boolean(n))
+  if (clean.length === 0) return undefined
+  return { '@context': 'https://schema.org', '@graph': clean }
+}
+
+/**
+ * Sitewide Organization + WebSite nodes, built from the admin-editable
+ * site_settings row (functions/api/admin/settings.ts) so a crawler that
+ * never runs JavaScript — which includes most AI answer-engine crawlers —
+ * sees the same business identity, contact details and social profiles as a
+ * real browser does (src/components/layout/Layout.tsx renders the
+ * equivalent client-side). Cached briefly since it's read on every page.
+ */
+async function loadOrganizationGraph(env: Env, site: string): Promise<Record<string, unknown>[]> {
+  const settings = await cached('/__seo/organization', 300, async () => {
+    const supabase = getSupabaseAdmin(env)
+    return getSiteSettings(supabase)
+  })
+
+  const orgId = `${site}/#organization`
+  const contactPoint =
+    settings.contactEmail || settings.contactPhone
+      ? {
+          '@type': 'ContactPoint',
+          contactType: 'customer service',
+          ...(settings.contactEmail ? { email: settings.contactEmail } : {}),
+          ...(settings.contactPhone ? { telephone: settings.contactPhone } : {}),
+          areaServed: 'GB',
+        }
+      : undefined
+  const sameAs = parseSocialLinks(settings.socialLinks)
+
+  return [
+    {
+      '@type': ['Organization', 'OnlineStore'],
+      '@id': orgId,
+      name: SITE_NAME,
+      url: site,
+      logo: absolutise(site, settings.logoUrl || DEFAULT_IMAGE_PATH),
+      areaServed: 'GB',
+      currenciesAccepted: 'GBP',
+      paymentAccepted: 'Open Banking',
+      priceRange: '££',
+      ...(settings.companyName ? { legalName: settings.companyName } : {}),
+      ...(settings.registeredAddress ? { address: settings.registeredAddress } : {}),
+      ...(contactPoint ? { contactPoint } : {}),
+      ...(sameAs.length > 0 ? { sameAs } : {}),
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${site}/#website`,
+      name: SITE_NAME,
+      url: site,
+      inLanguage: 'en-GB',
+      publisher: { '@id': orgId },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: { '@type': 'EntryPoint', urlTemplate: `${site}/shop?q={search_term_string}` },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ]
+}
+
+interface FaqRow {
+  question: string
+  answer: string
+}
+
+/**
+ * FAQPage structured data for the homepage and FAQ page, sourced from the
+ * same admin-editable `faqs` table the pages render (Admin → FAQs) — this is
+ * exactly the kind of clearly-labelled Q&A content answer engines (Google AI
+ * Overviews, Perplexity, ChatGPT search, etc.) prefer to extract and cite.
+ */
+async function loadFaqGraph(env: Env, site: string, path: string): Promise<Record<string, unknown> | null> {
+  if (path !== '/' && path !== '/faq') return null
+  const faqs = await cached('/__seo/faqs', 300, async () => {
+    const supabase = getSupabaseAdmin(env)
+    const { data } = await supabase.from('faqs').select('question, answer').eq('is_active', true).order('sort_order', { ascending: true })
+    return (data ?? []) as FaqRow[]
+  })
+  if (faqs.length === 0) return null
+
+  return {
+    '@type': 'FAQPage',
+    '@id': `${site}${path === '/' ? '/' : path}#faq`,
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  }
+}
+
+async function base(env: Env, origin: string, path: string, page: StaticPage, status: 200 | 404 = 200): Promise<PageMeta> {
+  const site = siteUrl(env, origin)
+  let jsonLd: Record<string, unknown> | undefined
+  // Sitewide entity data only makes sense on real, indexable pages — skip it
+  // for noindex/private/404 responses so their (absent) jsonLd stays absent.
+  if (status === 200 && !page.noindex) {
+    try {
+      const [orgNodes, faqNode] = await Promise.all([loadOrganizationGraph(env, site), loadFaqGraph(env, site, path)])
+      jsonLd = graph(...orgNodes, faqNode)
+    } catch {
+      // Never let sitewide entity data block basic meta tags from rendering.
+    }
+  }
+
   return {
     title: withSiteName(page.title),
     description: page.description,
     path,
-    image: `${siteUrl(env, origin)}${DEFAULT_IMAGE_PATH}`,
+    image: `${site}${DEFAULT_IMAGE_PATH}`,
     type: 'website',
     noindex: Boolean(page.noindex),
     status,
-    jsonLd: undefined,
+    jsonLd,
   }
 }
 
 interface ProductRow {
+  id: string
   slug: string
   sku: string
   name: string
@@ -119,6 +231,38 @@ interface ProductRow {
   image_url: string
   additional_images: Array<{ url?: string }> | null
   product_categories: { slug: string; name: string } | { slug: string; name: string }[] | null
+}
+
+interface ReviewRow {
+  customer_name: string
+  rating: number
+  title: string
+  comment: string
+  created_at: string
+}
+
+/**
+ * Approved-review aggregate + a handful of the most recent reviews for a
+ * product's schema.org `aggregateRating` / `review` fields. Only ever reads
+ * is_approved = true rows — the same moderation boundary the storefront
+ * itself renders through (Admin → Reviews), so structured data can never
+ * surface an unmoderated review to a crawler either.
+ */
+async function loadReviews(env: Env, productId: string): Promise<{ average: number; count: number; recent: ReviewRow[] }> {
+  return cached(`/__seo/reviews/${productId}`, 120, async () => {
+    const supabase = getSupabaseAdmin(env)
+    const { data } = await supabase
+      .from('product_reviews')
+      .select('customer_name, rating, title, comment, created_at')
+      .eq('product_id', productId)
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    const reviews = (data ?? []) as ReviewRow[]
+    const count = reviews.length
+    const average = count === 0 ? 0 : reviews.reduce((sum, r) => sum + r.rating, 0) / count
+    return { average, count, recent: reviews.slice(0, 5) }
+  })
 }
 
 /**
@@ -155,7 +299,7 @@ async function loadProduct(env: Env, slug: string): Promise<ProductRow | null> {
   const { data } = await supabase
     .from('products')
     .select(
-      'slug, sku, name, short_description, price_minor, stock_quantity, image_url, additional_images, product_categories ( slug, name )',
+      'id, slug, sku, name, short_description, price_minor, stock_quantity, image_url, additional_images, product_categories ( slug, name )',
     )
     .eq('slug', slug)
     .eq('is_active', true)
@@ -191,8 +335,13 @@ export async function resolvePageMeta(env: Env, requestUrl: URL): Promise<PageMe
   if (productMatch) {
     const slug = productMatch[1].toLowerCase()
     try {
-      const product = await cached(`/product/${slug}`, 120, () => loadProduct(env, slug))
+      const [product, orgNodes] = await Promise.all([
+        cached(`/product/${slug}`, 120, () => loadProduct(env, slug)),
+        loadOrganizationGraph(env, site),
+      ])
       if (!product) return base(env, origin, path, { title: 'Product not found', description: DEFAULT_DESCRIPTION, noindex: true }, 404)
+
+      const reviews = await loadReviews(env, product.id)
 
       const category = Array.isArray(product.product_categories) ? product.product_categories[0] : product.product_categories
       const productUrl = `${site}/product/${product.slug}`
@@ -209,41 +358,58 @@ export async function resolvePageMeta(env: Env, requestUrl: URL): Promise<PageMe
         type: 'product',
         noindex: false,
         status: 200,
-        jsonLd: {
-          '@context': 'https://schema.org',
-          '@graph': [
-            {
-              '@type': 'Product',
-              '@id': `${productUrl}#product`,
-              name: product.name,
-              description,
-              sku: product.sku,
-              image: images,
+        jsonLd: graph(
+          ...orgNodes,
+          {
+            '@type': 'Product',
+            '@id': `${productUrl}#product`,
+            name: product.name,
+            description,
+            sku: product.sku,
+            image: images,
+            url: productUrl,
+            brand: { '@type': 'Brand', name: SITE_NAME },
+            offers: {
+              '@type': 'Offer',
               url: productUrl,
-              brand: { '@type': 'Brand', name: SITE_NAME },
-              offers: {
-                '@type': 'Offer',
-                url: productUrl,
-                priceCurrency: 'GBP',
-                price: (product.price_minor / 100).toFixed(2),
-                availability: product.stock_quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-                itemCondition: 'https://schema.org/NewCondition',
-                areaServed: 'GB',
-                seller: { '@type': 'Organization', name: SITE_NAME },
-              },
+              priceCurrency: 'GBP',
+              price: (product.price_minor / 100).toFixed(2),
+              availability: product.stock_quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+              itemCondition: 'https://schema.org/NewCondition',
+              areaServed: 'GB',
+              seller: { '@id': `${site}/#organization` },
             },
-            {
-              '@type': 'BreadcrumbList',
-              itemListElement: [
-                { '@type': 'ListItem', position: 1, name: 'Shop', item: `${site}/shop` },
-                ...(category
-                  ? [{ '@type': 'ListItem', position: 2, name: category.name, item: `${site}/shop/${category.slug}` }]
-                  : []),
-                { '@type': 'ListItem', position: category ? 3 : 2, name: product.name },
-              ],
-            },
-          ],
-        },
+            ...(reviews.count > 0
+              ? {
+                  aggregateRating: {
+                    '@type': 'AggregateRating',
+                    ratingValue: reviews.average.toFixed(1),
+                    reviewCount: reviews.count,
+                    bestRating: 5,
+                    worstRating: 1,
+                  },
+                  review: reviews.recent.map((r) => ({
+                    '@type': 'Review',
+                    author: { '@type': 'Person', name: r.customer_name },
+                    datePublished: r.created_at,
+                    reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+                    ...(r.title ? { name: r.title } : {}),
+                    reviewBody: r.comment,
+                  })),
+                }
+              : {}),
+          },
+          {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Shop', item: `${site}/shop` },
+              ...(category
+                ? [{ '@type': 'ListItem', position: 2, name: category.name, item: `${site}/shop/${category.slug}` }]
+                : []),
+              { '@type': 'ListItem', position: category ? 3 : 2, name: product.name },
+            ],
+          },
+        ),
       }
     } catch {
       // Supabase not configured / transient failure: serve generic tags rather than an error page.
@@ -255,20 +421,22 @@ export async function resolvePageMeta(env: Env, requestUrl: URL): Promise<PageMe
   if (categoryMatch) {
     const slug = categoryMatch[1].toLowerCase()
     try {
-      const category = await cached(`/category/${slug}`, 300, () => loadCategory(env, slug))
+      const [category, orgNodes] = await Promise.all([
+        cached(`/category/${slug}`, 300, () => loadCategory(env, slug)),
+        loadOrganizationGraph(env, site),
+      ])
       if (!category) return base(env, origin, path, { title: 'Category not found', description: DEFAULT_DESCRIPTION, noindex: true }, 404)
-      const meta = base(env, origin, `/shop/${category.slug}`, {
+      const meta = await base(env, origin, `/shop/${category.slug}`, {
         title: category.name,
         description: category.description || `Shop ${category.name.toLowerCase()} at ${SITE_NAME} — UK delivery and secure Open Banking payment.`,
       })
-      meta.jsonLd = {
-        '@context': 'https://schema.org',
+      meta.jsonLd = graph(...orgNodes, {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Shop', item: `${site}/shop` },
           { '@type': 'ListItem', position: 2, name: category.name },
         ],
-      }
+      })
       return meta
     } catch {
       return base(env, origin, path, { title: 'Category', description: DEFAULT_DESCRIPTION })

@@ -60,7 +60,7 @@ export function useDocumentMeta({ title, description, path, image, type = 'websi
     })
 
     set('description', 'content', description)
-    set('robots', 'content', noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large')
+    set('robots', 'content', noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
     set('canonical', 'href', url)
     set('og:type', 'content', type)
     set('og:title', 'content', fullTitle)

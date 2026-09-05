@@ -24,10 +24,13 @@ const ALLOWED: Record<string, string> = {
   contactEmail: 'contact_email',
   contactPhone: 'contact_phone',
   deliveryStandardMinor: 'delivery_standard_minor',
+  deliveryExpressMinor: 'delivery_express_minor',
   deliveryFreeThresholdMinor: 'delivery_free_threshold_minor',
   heroHeading: 'hero_heading',
   heroSubheading: 'hero_subheading',
   ageNoticeText: 'age_notice_text',
+  logoUrl: 'logo_url',
+  socialLinks: 'social_links',
 }
 
 /** PATCH /api/admin/settings — update any subset of business/delivery/content fields. Admin-only. */
@@ -49,6 +52,12 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
       (typeof update.delivery_standard_minor !== 'number' || update.delivery_standard_minor < 0)
     ) {
       throw new ApiError(422, 'Standard delivery price must be a valid amount.')
+    }
+    if (
+      'delivery_express_minor' in update &&
+      (typeof update.delivery_express_minor !== 'number' || update.delivery_express_minor < 0)
+    ) {
+      throw new ApiError(422, 'Express delivery price must be a valid amount.')
     }
     if (
       'delivery_free_threshold_minor' in update &&

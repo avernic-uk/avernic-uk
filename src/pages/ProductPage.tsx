@@ -5,13 +5,15 @@ import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { useJsonLd } from '@/lib/useJsonLd'
 import { absoluteUrl, SITE_NAME } from '@/lib/seo'
 import { getProductBySlug, getRelatedProducts } from '@/lib/api/products'
+import { getProductReviews } from '@/lib/api/reviews'
 import { useBasket } from '@/lib/basket/BasketProvider'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { QuantityStepper } from '@/components/ui/QuantityStepper'
 import { ProductCard } from '@/components/product/ProductCard'
+import { ProductReviews } from '@/components/product/ProductReviews'
 import { Alert } from '@/components/ui/Alert'
-import type { Product } from '@/types'
+import type { Product, ProductReview, ReviewSummary } from '@/types'
 
 export default function ProductPage() {
   const { slug = '' } = useParams()
@@ -20,6 +22,8 @@ export default function ProductPage() {
   const [activeImage, setActiveImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
+  const [reviews, setReviews] = useState<ProductReview[]>([])
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummary>({ average: 0, count: 0 })
   const { addItem } = useBasket()
 
   useDocumentMeta({
@@ -58,6 +62,25 @@ export default function ProductPage() {
                 areaServed: 'GB',
                 seller: { '@type': 'Organization', name: SITE_NAME },
               },
+              ...(reviewSummary.count > 0
+                ? {
+                    aggregateRating: {
+                      '@type': 'AggregateRating',
+                      ratingValue: reviewSummary.average.toFixed(1),
+                      reviewCount: reviewSummary.count,
+                      bestRating: 5,
+                      worstRating: 1,
+                    },
+                    review: reviews.slice(0, 5).map((r) => ({
+                      '@type': 'Review',
+                      author: { '@type': 'Person', name: r.customerName },
+                      datePublished: r.createdAt,
+                      reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+                      ...(r.title ? { name: r.title } : {}),
+                      reviewBody: r.comment,
+                    })),
+                  }
+                : {}),
             },
             {
               '@type': 'BreadcrumbList',
@@ -75,7 +98,7 @@ export default function ProductPage() {
           ],
         }
         : null,
-    [product],
+    [product, reviewSummary, reviews],
   )
   useJsonLd(productJsonLd)
 
@@ -84,11 +107,25 @@ export default function ProductPage() {
     setProduct(undefined)
     setActiveImage(0)
     setQuantity(1)
+    setReviews([])
+    setReviewSummary({ average: 0, count: 0 })
     getProductBySlug(slug)
       .then((p) => {
         if (cancelled) return
         setProduct(p)
-        if (p) return getRelatedProducts(p.categoryId, p.id)
+        if (p) {
+          getProductReviews(p.id)
+            .then(({ reviews: r, summary }) => {
+              if (!cancelled) {
+                setReviews(r)
+                setReviewSummary(summary)
+              }
+            })
+            .catch(() => {
+              // Reviews are a supplementary section — a failed fetch shouldn't block the product page.
+            })
+          return getRelatedProducts(p.categoryId, p.id)
+        }
         return []
       })
       .then((rel) => {
@@ -155,7 +192,7 @@ export default function ProductPage() {
         {/* Gallery */}
         <div>
           <div className="aspect-square overflow-hidden rounded-2xl bg-ink-50">
-            <img src={images[activeImage]?.url} alt="" className="h-full w-full object-cover" />
+            <img src={images[activeImage]?.url} alt={images[activeImage]?.alt || product.name} className="h-full w-full object-cover" />
           </div>
           {images.length > 1 && (
             <div className="mt-3 flex gap-2">
@@ -253,6 +290,8 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+
+      <ProductReviews productId={product.id} productName={product.name} />
 
       {related.length > 0 && (
         <section className="mt-16 border-t border-ink-200 pt-10">

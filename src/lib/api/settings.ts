@@ -8,10 +8,13 @@ interface SettingsRow {
   contact_email: string
   contact_phone: string
   delivery_standard_minor: number
+  delivery_express_minor: number
   delivery_free_threshold_minor: number
   hero_heading: string
   hero_subheading: string
   age_notice_text: string
+  logo_url: string
+  social_links: string
 }
 
 function mapSettings(row: SettingsRow): SiteSettings {
@@ -22,10 +25,13 @@ function mapSettings(row: SettingsRow): SiteSettings {
     contactEmail: row.contact_email,
     contactPhone: row.contact_phone,
     deliveryStandardMinor: row.delivery_standard_minor,
+    deliveryExpressMinor: row.delivery_express_minor,
     deliveryFreeThresholdMinor: row.delivery_free_threshold_minor,
     heroHeading: row.hero_heading,
     heroSubheading: row.hero_subheading,
     ageNoticeText: row.age_notice_text,
+    logoUrl: row.logo_url ?? '',
+    socialLinks: row.social_links ?? '',
   }
 }
 

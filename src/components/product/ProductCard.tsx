@@ -3,10 +3,12 @@ import type { Product } from '@/types'
 import { formatGBP } from '@/lib/format'
 import { Badge } from '@/components/ui/Badge'
 import { useBasket } from '@/lib/basket/BasketProvider'
+import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 import { useState } from 'react'
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useBasket()
+  const { settings } = useSiteSettings()
   const [justAdded, setJustAdded] = useState(false)
   const [imageBroken, setImageBroken] = useState(false)
   const outOfStock = product.stockQuantity <= 0
@@ -23,7 +25,7 @@ export function ProductCard({ product }: { product: Product }) {
         {product.imageUrl && !imageBroken ? (
           <img
             src={product.imageUrl}
-            alt=""
+            alt={product.name}
             loading="lazy"
             onError={() => setImageBroken(true)}
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
@@ -31,7 +33,7 @@ export function ProductCard({ product }: { product: Product }) {
         ) : (
           // No photo yet (or the URL is broken): a quiet brand placeholder instead of a broken-image icon
           <span className="flex h-full w-full items-center justify-center">
-            <img src="/logo-icon.png" alt="" className="h-1/3 w-auto opacity-30 grayscale" />
+            <img src={settings.logoUrl || '/logo-icon.png'} alt="" className="h-1/3 w-auto opacity-30 grayscale" />
           </span>
         )}
         {/* Soft vignette so light product photography sits comfortably on a dark card */}

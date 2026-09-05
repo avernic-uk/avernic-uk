@@ -35,6 +35,9 @@ export interface BasketLine {
   quantity: number
 }
 
+/** Royal Mail shipping option chosen at checkout — see functions/_lib/pricing.ts. */
+export type DeliveryMethod = 'standard' | 'express'
+
 export interface PricedLine {
   productId: UUID
   quantity: number
@@ -54,6 +57,8 @@ export interface PricedBasket {
   totalMinor: number
   currency: 'GBP'
   hasIssues: boolean
+  deliveryMethod: DeliveryMethod
+  deliveryMethodLabel: string
 }
 
 export interface Address {

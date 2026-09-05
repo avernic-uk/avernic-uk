@@ -24,6 +24,7 @@ interface OrderDetail {
   items: { sku: string; name: string; quantity: number; unitPriceMinor: number; lineTotalMinor: number }[]
   subtotalMinor: number
   deliveryMinor: number
+  deliveryMethodLabel: string
   totalMinor: number
   paymentStatus: string
   orderStatus: string
@@ -171,9 +172,12 @@ export default function OrderConfirmationPage() {
             <dt className="text-ink-600">Subtotal</dt>
             <dd>{formatGBP(order.subtotalMinor)}</dd>
           </div>
-          <div className="flex justify-between">
-            <dt className="text-ink-600">Delivery</dt>
-            <dd>{order.deliveryMinor === 0 ? 'Free' : formatGBP(order.deliveryMinor)}</dd>
+          <div className="flex justify-between gap-4">
+            <dt className="text-ink-600">
+              Delivery
+              {order.deliveryMethodLabel && <span className="block text-xs text-ink-400">{order.deliveryMethodLabel}</span>}
+            </dt>
+            <dd className="whitespace-nowrap">{order.deliveryMinor === 0 ? 'Free' : formatGBP(order.deliveryMinor)}</dd>
           </div>
           <div className="flex justify-between border-t border-ink-200 pt-2 text-base font-semibold">
             <dt>Total</dt>

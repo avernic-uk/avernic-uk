@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
+import { useCookieConsent } from '@/lib/cookies/CookieConsentProvider'
 
 const columns = [
   {
@@ -25,12 +26,14 @@ const columns = [
       { to: '/terms', label: 'Terms & conditions' },
       { to: '/privacy', label: 'Privacy policy' },
       { to: '/cookies', label: 'Cookie policy' },
+      { to: '__cookie_preferences__', label: 'Cookie preferences' },
     ],
   },
 ]
 
 export function Footer() {
   const { settings } = useSiteSettings()
+  const { openPreferences } = useCookieConsent()
   const companyLine = settings.companyName
     ? `${settings.companyName}${settings.companyNumber ? ` (company number ${settings.companyNumber})` : ''}.`
     : '[Company name and registration number to be supplied].'
@@ -45,7 +48,7 @@ export function Footer() {
       <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-5 lg:py-16">
         <div className="sm:col-span-2 lg:col-span-2">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/logo-icon.png" alt="" className="h-7 w-auto" />
+            <img src={settings.logoUrl || '/logo-icon.png'} alt="" className="h-7 w-auto" />
             <span className="font-display text-base font-semibold text-ink-950">
               Avernic <span className="text-accent-600">UK</span>
             </span>
@@ -59,13 +62,25 @@ export function Footer() {
           <div key={col.heading}>
             <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-ink-500">{col.heading}</h3>
             <ul className="mt-4 space-y-2.5">
-              {col.links.map((link) => (
-                <li key={link.to}>
-                  <Link to={link.to} className="text-sm text-ink-600 transition-colors hover:text-accent-600">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {col.links.map((link) =>
+                link.to === '__cookie_preferences__' ? (
+                  <li key={link.to}>
+                    <button
+                      type="button"
+                      onClick={openPreferences}
+                      className="text-sm text-ink-600 underline-offset-2 transition-colors hover:text-accent-600 hover:underline"
+                    >
+                      {link.label}
+                    </button>
+                  </li>
+                ) : (
+                  <li key={link.to}>
+                    <Link to={link.to} className="text-sm text-ink-600 transition-colors hover:text-accent-600">
+                      {link.label}
+                    </Link>
+                  </li>
+                ),
+              )}
             </ul>
           </div>
         ))}
