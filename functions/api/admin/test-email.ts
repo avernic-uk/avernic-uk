@@ -37,26 +37,36 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .eq('order_id', order.id)
     if (itemsError) throw new ApiError(500, `Could not load order items: ${itemsError.message}`)
 
-    const result = await sendOrderEmailsIfNotAlreadySent(supabase, context.env, {
-      id: order.id,
-      orderNumber: order.order_number,
-      email: order.email,
-      telephone: order.telephone,
-      deliveryAddress: order.delivery_address,
-      items: (items ?? []).map((i) => ({
-        name: i.name,
-        sku: i.sku,
-        quantity: i.quantity,
-        unitPriceMinor: i.unit_price_minor,
-        lineTotalMinor: i.line_total_minor,
-      })),
-      subtotalMinor: order.subtotal_minor,
-      deliveryMinor: order.delivery_minor,
-      totalMinor: order.total_minor,
-      paymentStatus: order.payment_status,
-      orderStatus: order.order_status,
-      createdAt: order.created_at,
-    })
+    let result
+    try {
+      result = await sendOrderEmailsIfNotAlreadySent(supabase, context.env, {
+        id: order.id,
+        orderNumber: order.order_number,
+        email: order.email,
+        telephone: order.telephone,
+        deliveryAddress: order.delivery_address,
+        items: (items ?? []).map((i) => ({
+          name: i.name,
+          sku: i.sku,
+          quantity: i.quantity,
+          unitPriceMinor: i.unit_price_minor,
+          lineTotalMinor: i.line_total_minor,
+        })),
+        subtotalMinor: order.subtotal_minor,
+        deliveryMinor: order.delivery_minor,
+        totalMinor: order.total_minor,
+        paymentStatus: order.payment_status,
+        orderStatus: order.order_status,
+        createdAt: order.created_at,
+      })
+    } catch (sendError) {
+      // Diagnostic-only: surface the real error instead of a generic 500,
+      // since this route never ships to the real product.
+      return json(
+        { ok: false, debugError: sendError instanceof Error ? sendError.message : String(sendError) },
+        { status: 500 },
+      )
+    }
 
     return json({ ok: true, result })
   } catch (error) {
