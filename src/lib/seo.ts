@@ -1,7 +1,7 @@
 export const SITE_NAME = 'Avernic UK'
-export const DEFAULT_TITLE = 'Avernic UK — Peptide skincare, made simpler.'
+export const DEFAULT_TITLE = 'Avernic UK — Research peptides, 3rd party tested.'
 export const DEFAULT_DESCRIPTION =
-  'Cosmetic peptide skincare from Avernic UK — serums, moisturisers, eye care and treatments, HPLC-tested for purity. UK delivery, Open Banking checkout. 18+.'
+  'Cosmetic peptide skincare from Avernic UK — Research peptides based in UK, HPLC-tested for purity. UK delivery, Open Banking checkout. 18+.'
 export const DEFAULT_OG_IMAGE_PATH = '/logo-lockup.png'
 
 /**
