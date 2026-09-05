@@ -13,7 +13,7 @@ import type { Env } from './_lib/types'
  * from a competitor's.
  */
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const site = (context.env.SITE_URL || 'https://avernic.uk').replace(/\/+$/, '')
+  const site = (context.env.SITE_URL || 'https://www.avernic.uk').replace(/\/+$/, '')
   const body = await cachedText('/llms-full.txt', 600, () => buildLlmsText(context.env, site, true))
   return new Response(body, {
     headers: {

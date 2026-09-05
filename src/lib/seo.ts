@@ -11,7 +11,7 @@ export const DEFAULT_OG_IMAGE_PATH = '/logo-lockup.png'
  */
 export function siteUrl(): string {
   const configured = (import.meta.env.VITE_SITE_URL as string | undefined)?.trim()
-  const base = configured || (typeof window !== 'undefined' ? window.location.origin : 'https://avernic.uk')
+  const base = configured || (typeof window !== 'undefined' ? window.location.origin : 'https://www.avernic.uk')
   return base.replace(/\/+$/, '')
 }
 

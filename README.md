@@ -190,16 +190,28 @@ Also: dynamic `sitemap.xml` from the live catalogue, `robots.txt` excluding priv
 
 ### Canonical domain
 
-The canonical origin is **`https://avernic.uk`** (apex, no `www`). It is set in `wrangler.toml`
-(`SITE_URL`), `index.html`, `public/robots.txt` and the fallbacks in `src/lib/seo.ts`,
-`functions/_lib/seoMeta.ts`, `functions/_lib/llmsText.ts` and `functions/sitemap.xml.ts`. If it ever
-changes, change it in all of them together.
+The canonical origin is **`https://www.avernic.uk`**. It is set in `wrangler.toml` (`SITE_URL`),
+`index.html`, `public/robots.txt` and the fallbacks in `src/lib/seo.ts`, `functions/llms.txt.ts`,
+`functions/llms-full.txt.ts` and `functions/sitemap.xml.ts`. If it ever changes, change it in all of
+them together.
 
-`functions/_middleware.ts` also 301-redirects duplicate hostnames onto it — `www.avernic.uk` and the
-Cloudflare project domain `avernic-uk.pages.dev` — so the same catalogue can't be crawled and ranked
-three times over. Deliberately narrow: it only redirects `GET`/`HEAD`, never `/api/*` (a 301 would
-break the Fena webhook), and never hashed preview deployments like
-`<hash>.avernic-uk.pages.dev`, which stay independently testable.
+**Only `www.avernic.uk` has a DNS record.** The apex `avernic.uk` does not resolve at all — it has
+never been added as a custom domain on the Cloudflare Pages project. This was briefly set as the
+canonical host and it took the live site down: the middleware dutifully 301-redirected every visitor
+from the working `www` host to an apex with no A record. **Before changing the canonical host, check
+that the new host actually resolves** (`python3 -c "import socket;socket.getaddrinfo('host',None)"`
+or `dig +short <host> A`) — do not infer it from a browser tool reporting an origin, which is what
+went wrong.
+
+To move to the apex later: add `avernic.uk` as a custom domain in Cloudflare Pages (Workers & Pages →
+avernic-uk → Custom domains), confirm it resolves, then flip the values above.
+
+`functions/_middleware.ts` 301-redirects duplicate hostnames onto the canonical one — the apex, the
+`www` form, and the Cloudflare project domain `avernic-uk.pages.dev` — so the same catalogue can't be
+crawled and ranked three times over. It works in whichever direction the canonical is configured, and
+is deliberately narrow: `GET`/`HEAD` only, never `/api/*` (a 301 would break the Fena webhook), and
+never hashed preview deployments like `<hash>.avernic-uk.pages.dev`, which stay independently
+testable.
 
 ### Structured data
 

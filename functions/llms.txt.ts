@@ -7,7 +7,7 @@ import type { Env } from './_lib/types'
  * and why. The full-detail companion document is at /llms-full.txt.
  */
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const site = (context.env.SITE_URL || 'https://avernic.uk').replace(/\/+$/, '')
+  const site = (context.env.SITE_URL || 'https://www.avernic.uk').replace(/\/+$/, '')
   const body = await cachedText('/llms.txt', 600, () => buildLlmsText(context.env, site, false))
   return new Response(body, {
     headers: {

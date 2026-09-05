@@ -53,9 +53,16 @@ function canonicalRedirect(request: Request, url: URL, siteUrl: string | undefin
   if (canonicalHost.endsWith('.pages.dev') || canonicalHost.startsWith('localhost') || canonicalHost.startsWith('127.')) return null
 
   const host = url.host
+  // Works in whichever direction the canonical host is configured: `www.x` when
+  // the canonical is `x`, and bare `x` when the canonical is `www.x`. A redirect
+  // is only ever emitted towards a host that actually resolves, because the
+  // canonical host is the one being deployed to — sending traffic at a hostname
+  // with no DNS record takes the whole site down, which is precisely what
+  // happened when this was first set to the apex domain.
   const isWwwOfCanonical = host === `www.${canonicalHost}`
+  const isApexOfCanonical = canonicalHost === `www.${host}`
   const isProjectPagesDev = host.endsWith('.pages.dev') && host.split('.').length === 3
-  if (!isWwwOfCanonical && !isProjectPagesDev) return null
+  if (!isWwwOfCanonical && !isApexOfCanonical && !isProjectPagesDev) return null
 
   const target = new URL(url.pathname + url.search, canonical.origin)
   return Response.redirect(target.toString(), 301)

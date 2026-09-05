@@ -19,7 +19,7 @@ pages_build_output_dir = "dist"
 # only reaches the browser bundle, Functions never see import.meta.env.
 # Same URL value as VITE_SUPABASE_URL above, just without the prefix.
 [vars]
-SITE_URL = "https://avernic.uk"
+SITE_URL = "https://www.avernic.uk"
 VITE_SUPABASE_URL = "https://olgcumyhyfyjaeevqowx.supabase.co"
 VITE_SUPABASE_ANON_KEY = "sb_publishable_TkOiGuxX94IyB9TOjede0g_2qCOI6Gp"
 SUPABASE_URL = "https://olgcumyhyfyjaeevqowx.supabase.co"
