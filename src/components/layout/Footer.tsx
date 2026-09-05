@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 
 const columns = [
   {
@@ -29,6 +30,14 @@ const columns = [
 ]
 
 export function Footer() {
+  const { settings } = useSiteSettings()
+  const companyLine = settings.companyName
+    ? `${settings.companyName}${settings.companyNumber ? ` (company number ${settings.companyNumber})` : ''}.`
+    : '[Company name and registration number to be supplied].'
+  const addressLine = settings.registeredAddress
+    ? `Registered office: ${settings.registeredAddress}.`
+    : 'Registered office: [registered address to be supplied].'
+
   return (
     <footer className="relative border-t border-ink-200/70 bg-ink-50">
       {/* Brass hairline along the top edge */}
@@ -66,9 +75,8 @@ export function Footer() {
         <div className="container-page flex flex-col gap-3 py-6 text-xs text-ink-500 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Avernic UK. All rights reserved.</p>
           <p className="max-w-2xl">
-            Avernic UK is a UK-based online retailer. [Company name and registration number to be
-            supplied]. Registered office: [registered address to be supplied]. All products sold on
-            Avernic UK are cosmetic skincare products intended for topical use only and are not
+            Avernic UK is a UK-based online retailer. {companyLine} {addressLine} All products sold
+            on Avernic UK are cosmetic skincare products intended for topical use only and are not
             medicines. Our products are intended for adults aged 18 and over. Prices shown in
             pounds sterling (GBP), inclusive of VAT where applicable. Delivery to UK addresses
             only.

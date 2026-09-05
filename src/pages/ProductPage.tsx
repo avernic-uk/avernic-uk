@@ -222,6 +222,19 @@ export default function ProductPage() {
             </div>
           )}
 
+          <p className="mt-5 flex items-center gap-2 text-xs text-ink-500">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0 text-accent-500">
+              <path
+                d="M9 3h6M10 3v5.2a3 3 0 0 1-.5 1.66L5.9 15.7A2 2 0 0 0 7.6 19h8.8a2 2 0 0 0 1.7-3.3l-3.6-5.85A3 3 0 0 1 14 8.2V3M7.5 14.5h9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            HPLC-tested for ingredient purity before sale
+          </p>
+
           <div className="mt-10 space-y-6 border-t border-ink-200 pt-8">
             <div>
               <h2 className="text-sm font-semibold text-ink-900">Product information</h2>

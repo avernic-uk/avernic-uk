@@ -8,6 +8,11 @@ import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 import type { ProductCategory } from '@/types'
 
+interface GalleryImage {
+  url: string
+  alt: string
+}
+
 interface FormState {
   slug: string
   sku: string
@@ -19,6 +24,7 @@ interface FormState {
   categoryId: string
   stockQuantity: string
   imageUrl: string
+  additionalImages: GalleryImage[]
   isActive: boolean
   isFeatured: boolean
 }
@@ -34,6 +40,7 @@ interface AdminProductRow {
   category_id: string
   stock_quantity: number
   image_url: string | null
+  additional_images: GalleryImage[] | null
   is_active: boolean
   is_featured: boolean
 }
@@ -49,6 +56,7 @@ const empty: FormState = {
   categoryId: '',
   stockQuantity: '0',
   imageUrl: '',
+  additionalImages: [],
   isActive: true,
   isFeatured: false,
 }
@@ -87,6 +95,7 @@ export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit'
           categoryId: product.category_id,
           stockQuantity: String(product.stock_quantity),
           imageUrl: product.image_url ?? '',
+          additionalImages: product.additional_images ?? [],
           isActive: product.is_active,
           isFeatured: product.is_featured,
         })
@@ -114,6 +123,7 @@ export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit'
       categoryId: form.categoryId,
       stockQuantity: Number(form.stockQuantity) || 0,
       imageUrl: form.imageUrl,
+      additionalImages: form.additionalImages.filter((img) => img.url.trim()),
       isActive: form.isActive,
       isFeatured: form.isFeatured,
     }
@@ -165,6 +175,55 @@ export default function AdminProductFormPage({ mode }: { mode: 'create' | 'edit'
           />
           <Input label="Stock quantity" type="number" min="0" required value={form.stockQuantity} onChange={(e) => set('stockQuantity', e.target.value)} />
           <Input label="Main image URL" value={form.imageUrl} onChange={(e) => set('imageUrl', e.target.value)} />
+        </div>
+
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="block text-sm font-medium text-ink-800">Gallery images (optional)</span>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => set('additionalImages', [...form.additionalImages, { url: '', alt: '' }])}
+            >
+              Add image
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {form.additionalImages.map((img, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  placeholder="Image URL"
+                  value={img.url}
+                  onChange={(e) => {
+                    const next = [...form.additionalImages]
+                    next[index] = { ...next[index], url: e.target.value }
+                    set('additionalImages', next)
+                  }}
+                  className="h-11 flex-1 rounded-xl border border-ink-300 bg-white px-3.5 text-sm text-ink-900 shadow-card focus-visible:outline-2 focus-visible:outline-accent-500 dark:bg-ink-50"
+                />
+                <input
+                  placeholder="Alt text"
+                  value={img.alt}
+                  onChange={(e) => {
+                    const next = [...form.additionalImages]
+                    next[index] = { ...next[index], alt: e.target.value }
+                    set('additionalImages', next)
+                  }}
+                  className="h-11 w-40 rounded-xl border border-ink-300 bg-white px-3.5 text-sm text-ink-900 shadow-card focus-visible:outline-2 focus-visible:outline-accent-500 dark:bg-ink-50"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => set('additionalImages', form.additionalImages.filter((_, i) => i !== index))}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+            {form.additionalImages.length === 0 && <p className="text-xs text-ink-400">No gallery images yet.</p>}
+          </div>
         </div>
 
         <div>

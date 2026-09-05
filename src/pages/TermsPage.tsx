@@ -1,6 +1,8 @@
 import { InfoPageLayout, Placeholder } from '@/components/layout/InfoPageLayout'
+import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 
 export default function TermsPage() {
+  const { settings } = useSiteSettings()
   return (
     <InfoPageLayout title="Terms & conditions" description="The terms and conditions governing use of the Avernic UK website and orders." lastUpdated="[date]">
       <p>
@@ -11,8 +13,11 @@ export default function TermsPage() {
 
       <h2 className="text-lg font-semibold text-ink-900">1. About us</h2>
       <p>
-        Avernic UK is operated by <Placeholder>legal company name and registration number</Placeholder>,
-        registered office at <Placeholder>registered address</Placeholder>.
+        Avernic UK is operated by{' '}
+        {settings.companyName
+          ? `${settings.companyName}${settings.companyNumber ? ` (company number ${settings.companyNumber})` : ''}`
+          : <Placeholder>legal company name and registration number</Placeholder>}
+        , registered office at {settings.registeredAddress || <Placeholder>registered address</Placeholder>}.
       </p>
 
       <h2 className="text-lg font-semibold text-ink-900">2. Placing an order</h2>

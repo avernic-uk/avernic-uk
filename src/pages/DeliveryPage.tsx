@@ -1,6 +1,12 @@
 import { InfoPageLayout, Placeholder } from '@/components/layout/InfoPageLayout'
+import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
+
+function formatPounds(minor: number): string {
+  return `£${(minor / 100).toFixed(2)}`
+}
 
 export default function DeliveryPage() {
+  const { settings } = useSiteSettings()
   return (
     <InfoPageLayout title="Delivery information" description="UK delivery options, pricing and timescales for Avernic UK orders." lastUpdated="[date]">
       <h2 className="text-lg font-semibold text-ink-900">Where we deliver</h2>
@@ -8,8 +14,8 @@ export default function DeliveryPage() {
 
       <h2 className="text-lg font-semibold text-ink-900">Delivery pricing</h2>
       <p>
-        Standard UK delivery is currently <Placeholder>confirm delivery price, e.g. £2.95</Placeholder>, and free
-        on orders over <Placeholder>confirm free delivery threshold, e.g. £40</Placeholder>. Delivery cost is shown at
+        Standard UK delivery is currently {formatPounds(settings.deliveryStandardMinor)}, and free
+        on orders over {formatPounds(settings.deliveryFreeThresholdMinor)}. Delivery cost is shown at
         checkout before you pay.
       </p>
 

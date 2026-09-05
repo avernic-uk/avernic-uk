@@ -131,3 +131,25 @@ export interface PricedBasket {
   currency: 'GBP'
   hasIssues: boolean
 }
+
+/** Admin-editable site content — see supabase/migrations/0003_admin_content.sql. */
+export interface SiteSettings {
+  companyName: string
+  companyNumber: string
+  registeredAddress: string
+  contactEmail: string
+  contactPhone: string
+  deliveryStandardMinor: number
+  deliveryFreeThresholdMinor: number
+  heroHeading: string
+  heroSubheading: string
+  ageNoticeText: string
+}
+
+export interface Faq {
+  id: UUID
+  question: string
+  answer: string
+  sortOrder: number
+  isActive: boolean
+}

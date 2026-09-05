@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { adminFetchJson } from '@/lib/api/adminFetch'
+import { getCategories } from '@/lib/api/products'
 import { formatGBP } from '@/lib/format'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
-import { Input } from '@/components/ui/Input'
+import { Input, Select } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
 import { Alert } from '@/components/ui/Alert'
 import { ButtonLink, Button } from '@/components/ui/Button'
+import type { ProductCategory } from '@/types'
 
 interface ProductRow {
   id: string
@@ -19,23 +21,47 @@ interface ProductRow {
   product_categories: { name: string } | null
 }
 
+const PAGE_SIZE = 25
+
 export default function AdminProductsPage() {
   useDocumentMeta({ title: 'Products — Admin', noindex: true })
   const [searchParams, setSearchParams] = useSearchParams()
   const search = searchParams.get('search') ?? ''
+  const categoryId = searchParams.get('categoryId') ?? ''
+  const page = Number(searchParams.get('page') ?? '1')
 
+  const [categories, setCategories] = useState<ProductCategory[]>([])
   const [products, setProducts] = useState<ProductRow[] | null>(null)
+  const [total, setTotal] = useState(0)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getCategories().then(setCategories)
+  }, [])
 
   function load() {
     const qs = new URLSearchParams()
     if (search) qs.set('search', search)
-    adminFetchJson<{ products: ProductRow[] }>(`/api/admin/products?${qs}`)
-      .then((res) => setProducts(res.products))
+    if (categoryId) qs.set('categoryId', categoryId)
+    qs.set('page', String(page))
+    adminFetchJson<{ products: ProductRow[]; total: number }>(`/api/admin/products?${qs}`)
+      .then((res) => {
+        setProducts(res.products)
+        setTotal(res.total)
+      })
       .catch((err) => setError(err.message))
   }
 
-  useEffect(load, [search])
+  useEffect(load, [search, categoryId, page])
+
+  function updateParams(next: Record<string, string>) {
+    const merged = { search, categoryId, ...next }
+    const qs: Record<string, string> = {}
+    if (merged.search) qs.search = merged.search
+    if (merged.categoryId) qs.categoryId = merged.categoryId
+    // Any filter change resets pagination back to page 1.
+    setSearchParams(qs)
+  }
 
   async function toggleActive(product: ProductRow) {
     try {
@@ -49,6 +75,16 @@ export default function AdminProductsPage() {
     }
   }
 
+  function goToPage(next: number) {
+    const qs: Record<string, string> = {}
+    if (search) qs.search = search
+    if (categoryId) qs.categoryId = categoryId
+    qs.page = String(next)
+    setSearchParams(qs)
+  }
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -58,12 +94,16 @@ export default function AdminProductsPage() {
         </ButtonLink>
       </div>
 
-      <div className="mt-6 max-w-sm">
-        <Input
-          label="Search products"
-          value={search}
-          onChange={(e) => setSearchParams(e.target.value ? { search: e.target.value } : {})}
-        />
+      <div className="mt-6 grid max-w-2xl gap-4 sm:grid-cols-2">
+        <Input label="Search products" value={search} onChange={(e) => updateParams({ search: e.target.value })} />
+        <Select label="Category" value={categoryId} onChange={(e) => updateParams({ categoryId: e.target.value })}>
+          <option value="">All categories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </Select>
       </div>
 
       {error && (
@@ -119,6 +159,22 @@ export default function AdminProductsPage() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between gap-4">
+          <p className="text-xs text-ink-500">
+            Page {page} of {totalPages} · {total} product{total === 1 ? '' : 's'}
+          </p>
+          <div className="flex gap-2">
+            <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
+              Previous
+            </Button>
+            <Button size="sm" variant="ghost" disabled={page >= totalPages} onClick={() => goToPage(page + 1)}>
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

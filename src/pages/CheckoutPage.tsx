@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useBasket } from '@/lib/basket/BasketProvider'
 import { useAuth } from '@/lib/auth/AuthProvider'
@@ -8,6 +8,8 @@ import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { Input, Checkbox } from '@/components/ui/Input'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
+import { CheckoutSteps } from '@/components/checkout/CheckoutSteps'
+import { SecureCheckoutBadges } from '@/components/checkout/SecureCheckoutBadges'
 
 interface FormState {
   fullName: string
@@ -31,6 +33,60 @@ const initialState: FormState = {
   county: '',
   postcode: '',
   termsAccepted: false,
+}
+
+const sectionIcons = {
+  user: (
+    <path
+      d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  pin: (
+    <path
+      d="M12 21s-7-6.1-7-11a7 7 0 1 1 14 0c0 4.9-7 11-7 11Zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  shield: (
+    <path
+      d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3Zm-2.5 9 2 2 3.5-4"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+} as const
+
+function SectionCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: keyof typeof sectionIcons
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <section className="rounded-2xl border border-ink-200/70 bg-white p-5 shadow-card dark:bg-ink-50 sm:p-6">
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-500/10 text-accent-600">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+            {sectionIcons[icon]}
+          </svg>
+        </span>
+        <h2 className="text-sm font-semibold text-ink-950">{title}</h2>
+      </div>
+      <div className="mt-5">{children}</div>
+    </section>
+  )
 }
 
 export default function CheckoutPage() {
@@ -65,7 +121,12 @@ export default function CheckoutPage() {
     e.preventDefault()
     if (submitting) return // prevent double submission
     setSubmitError(null)
-    if (!validate()) return
+    if (!validate()) {
+      // Bring the first invalid field into view — sections are stacked and
+      // the error could be well below the fold on mobile.
+      document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -128,17 +189,71 @@ export default function CheckoutPage() {
     )
   }
 
-  return (
-    <div className="container-page py-10 sm:py-14">
-      <h1 className="text-3xl font-semibold text-ink-950">Checkout</h1>
+  const summary = (
+    <>
+      <ul className="space-y-4">
+        {priced.lines.map((line) => (
+          <li key={line.productId} className="flex gap-3">
+            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-ink-50 dark:bg-ink-100">
+              {line.imageUrl && <img src={line.imageUrl} alt="" className="h-full w-full object-cover" />}
+              <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink-900 text-[10px] font-semibold text-white dark:bg-ink-950">
+                {line.quantity}
+              </span>
+            </div>
+            <div className="flex flex-1 items-center justify-between gap-3">
+              <span className="text-sm text-ink-700">{line.name}</span>
+              <span className="whitespace-nowrap text-sm font-medium text-ink-950">{formatGBP(line.lineTotalMinor)}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <dl className="mt-5 space-y-2 border-t border-ink-200 pt-4 text-sm">
+        <div className="flex justify-between">
+          <dt className="text-ink-600">Subtotal</dt>
+          <dd className="text-ink-900">{formatGBP(priced.subtotalMinor)}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className="text-ink-600">Delivery</dt>
+          <dd className="text-ink-900">{priced.deliveryMinor === 0 ? 'Free' : formatGBP(priced.deliveryMinor)}</dd>
+        </div>
+        <div className="flex justify-between border-t border-ink-200 pt-3 text-base font-semibold">
+          <dt className="text-ink-950">Total</dt>
+          <dd className="text-ink-950">{formatGBP(priced.totalMinor)}</dd>
+        </div>
+      </dl>
+      <div className="mt-5 border-t border-ink-200 pt-4">
+        <SecureCheckoutBadges />
+      </div>
+    </>
+  )
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_380px]">
-        <form onSubmit={onSubmit} noValidate className="space-y-10">
-          <section aria-labelledby="customer-details-heading">
-            <h2 id="customer-details-heading" className="text-sm font-semibold uppercase tracking-wide text-ink-500">
-              Your details
-            </h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+  return (
+    <div className="container-page py-8 sm:py-12">
+      <div className="mx-auto max-w-3xl">
+        <CheckoutSteps current="checkout" />
+      </div>
+      <h1 className="mt-6 text-center font-display text-3xl font-semibold text-ink-950 sm:text-left">Checkout</h1>
+
+      {/* Compact order total, visible only until the desktop summary card appears */}
+      <details className="group mt-6 rounded-2xl border border-ink-200 bg-ink-50/60 lg:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm">
+          <span className="font-medium text-ink-900">
+            Order summary <span className="text-ink-500">({priced.lines.length} item{priced.lines.length === 1 ? '' : 's'})</span>
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="font-semibold text-ink-950">{formatGBP(priced.totalMinor)}</span>
+            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-ink-500 transition-transform group-open:rotate-180">
+              <path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </summary>
+        <div className="border-t border-ink-200 p-4 pt-4">{summary}</div>
+      </details>
+
+      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px] lg:gap-10">
+        <form onSubmit={onSubmit} noValidate className="space-y-5">
+          <SectionCard icon="user" title="Your details">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input
                   label="Full name"
@@ -169,13 +284,10 @@ export default function CheckoutPage() {
                 hint="Needed in case we need to contact you about delivery."
               />
             </div>
-          </section>
+          </SectionCard>
 
-          <section aria-labelledby="delivery-address-heading">
-            <h2 id="delivery-address-heading" className="text-sm font-semibold uppercase tracking-wide text-ink-500">
-              UK delivery address
-            </h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <SectionCard icon="pin" title="UK delivery address">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input
                   label="Address line 1"
@@ -219,82 +331,66 @@ export default function CheckoutPage() {
               />
               <div>
                 <span className="mb-1.5 block text-sm font-medium text-ink-800">Country</span>
-                <div className="flex h-11 w-full items-center rounded-lg border border-ink-200 bg-ink-50 px-3.5 text-sm text-ink-600">
+                <div className="flex h-11 w-full items-center rounded-xl border border-ink-200 bg-ink-50 px-3.5 text-sm text-ink-600">
                   United Kingdom
                 </div>
                 <p className="mt-1.5 text-xs text-ink-500">Avernic UK delivers to UK addresses only.</p>
               </div>
             </div>
-          </section>
+          </SectionCard>
 
-          <section aria-labelledby="payment-heading">
-            <h2 id="payment-heading" className="text-sm font-semibold uppercase tracking-wide text-ink-500">
-              Payment
-            </h2>
-            <p className="mt-3 rounded-xl border border-ink-200 bg-ink-50 p-4 text-sm text-ink-700">
-              Payment is completed securely via Open Banking, powered by Fena. After placing your
-              order you'll be taken to your bank to authorise payment directly — we never see or
-              store your banking details.
-            </p>
-          </section>
+          <SectionCard icon="shield" title="Payment">
+            <div className="flex items-start gap-3 rounded-xl border border-accent-500/25 bg-accent-50 p-4 dark:bg-accent-50/60">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="mt-0.5 h-5 w-5 shrink-0 text-accent-600">
+                <path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <p className="text-sm leading-relaxed text-ink-700">
+                Payment is completed securely via Open Banking, powered by Fena. After placing your
+                order you'll be taken to your bank to authorise payment directly — we never see or
+                store your banking details.
+              </p>
+            </div>
 
-          <section aria-labelledby="legal-heading" className="space-y-3">
-            <h2 id="legal-heading" className="sr-only">
-              Terms
-            </h2>
-            <Checkbox
-              label={
-                <>
-                  I have read and accept the{' '}
-                  <Link to="/terms" target="_blank" className="underline">
-                    Terms &amp; Conditions
-                  </Link>{' '}
-                  and{' '}
-                  <Link to="/privacy" target="_blank" className="underline">
-                    Privacy Policy
-                  </Link>
-                  .
-                </>
-              }
-              checked={form.termsAccepted}
-              onChange={(e) => set('termsAccepted', e.target.checked)}
-              error={fieldErrors.termsAccepted}
-            />
-          </section>
+            <div className="mt-5 space-y-3">
+              <Checkbox
+                label={
+                  <>
+                    I have read and accept the{' '}
+                    <Link to="/terms" target="_blank" className="underline">
+                      Terms &amp; Conditions
+                    </Link>{' '}
+                    and{' '}
+                    <Link to="/privacy" target="_blank" className="underline">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </>
+                }
+                checked={form.termsAccepted}
+                onChange={(e) => set('termsAccepted', e.target.checked)}
+                error={fieldErrors.termsAccepted}
+              />
+            </div>
 
-          {submitError && <Alert tone="danger">{submitError}</Alert>}
+            {submitError && (
+              <div className="mt-4">
+                <Alert tone="danger">{submitError}</Alert>
+              </div>
+            )}
 
-          <Button type="submit" variant="accent" size="lg" fullWidth loading={submitting}>
-            Pay securely
-          </Button>
+            <Button type="submit" variant="accent" size="lg" fullWidth loading={submitting} className="mt-5">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+                <path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Pay {formatGBP(priced.totalMinor)} securely
+            </Button>
+            <p className="mt-3 text-center text-xs text-ink-500 lg:hidden">Redirects to your bank to complete payment.</p>
+          </SectionCard>
         </form>
 
-        <aside className="h-fit rounded-2xl border border-ink-200 bg-ink-50/60 p-6">
+        <aside className="hidden h-fit rounded-2xl border border-ink-200 bg-ink-50/60 p-6 lg:sticky lg:top-24 lg:block">
           <h2 className="text-sm font-semibold text-ink-900">Order summary</h2>
-          <ul className="mt-4 space-y-3">
-            {priced.lines.map((line) => (
-              <li key={line.productId} className="flex justify-between text-sm">
-                <span className="text-ink-700">
-                  {line.name} <span className="text-ink-400">× {line.quantity}</span>
-                </span>
-                <span className="font-medium text-ink-950">{formatGBP(line.lineTotalMinor)}</span>
-              </li>
-            ))}
-          </ul>
-          <dl className="mt-4 space-y-2 border-t border-ink-200 pt-4 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-ink-600">Subtotal</dt>
-              <dd className="text-ink-900">{formatGBP(priced.subtotalMinor)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-ink-600">Delivery</dt>
-              <dd className="text-ink-900">{priced.deliveryMinor === 0 ? 'Free' : formatGBP(priced.deliveryMinor)}</dd>
-            </div>
-            <div className="flex justify-between border-t border-ink-200 pt-2 text-base font-semibold">
-              <dt className="text-ink-950">Total</dt>
-              <dd className="text-ink-950">{formatGBP(priced.totalMinor)}</dd>
-            </div>
-          </dl>
+          <div className="mt-4">{summary}</div>
         </aside>
       </div>
     </div>

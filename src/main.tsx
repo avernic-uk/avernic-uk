@@ -5,6 +5,7 @@ import App from './App'
 import { AuthProvider } from './lib/auth/AuthProvider'
 import { BasketProvider } from './lib/basket/BasketProvider'
 import { ThemeProvider } from './lib/theme/ThemeProvider'
+import { SiteSettingsProvider } from './lib/settings/SiteSettingsProvider'
 import './index.css'
 
 const rootEl = document.getElementById('root')
@@ -17,9 +18,11 @@ ReactDOM.createRoot(rootEl).render(
     <ThemeProvider>
       <BrowserRouter>
         <AuthProvider>
-          <BasketProvider>
-            <App />
-          </BasketProvider>
+          <SiteSettingsProvider>
+            <BasketProvider>
+              <App />
+            </BasketProvider>
+          </SiteSettingsProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

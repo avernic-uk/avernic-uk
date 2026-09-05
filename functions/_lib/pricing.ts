@@ -1,18 +1,25 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { BasketLine, PricedBasket, PricedLine } from './types'
+import { getSiteSettings } from './settings'
 
 /**
- * Delivery pricing. This is placeholder business logic — replace the
- * constants below with Avernic UK's actual delivery pricing before launch.
+ * Delivery pricing. The actual values are admin-editable (see
+ * functions/api/admin/settings.ts) and read from site_settings at request
+ * time — the constants below are only the fallback used if that row can't
+ * be read, and the default value tests in pricing.test.ts pin against.
  * Kept in one place so it's applied identically by /api/basket/price and
  * /api/checkout/create-order (the two places a total is ever calculated).
  */
 const STANDARD_DELIVERY_MINOR = 295 // £2.95
 const FREE_DELIVERY_THRESHOLD_MINOR = 4000 // Free delivery over £40
 
-export function calculateDeliveryMinor(subtotalMinor: number): number {
+export function calculateDeliveryMinor(
+  subtotalMinor: number,
+  standardMinor: number = STANDARD_DELIVERY_MINOR,
+  freeThresholdMinor: number = FREE_DELIVERY_THRESHOLD_MINOR,
+): number {
   if (subtotalMinor <= 0) return 0
-  return subtotalMinor >= FREE_DELIVERY_THRESHOLD_MINOR ? 0 : STANDARD_DELIVERY_MINOR
+  return subtotalMinor >= freeThresholdMinor ? 0 : standardMinor
 }
 
 interface ProductRow {
@@ -46,10 +53,10 @@ export async function priceBasket(supabase: SupabaseClient, lines: BasketLine[])
     return { lines: [], subtotalMinor: 0, deliveryMinor: 0, totalMinor: 0, currency: 'GBP', hasIssues: false }
   }
 
-  const { data, error } = await supabase
-    .from('products')
-    .select('id, sku, name, price_minor, stock_quantity, image_url, is_active')
-    .in('id', productIds)
+  const [{ data, error }, settings] = await Promise.all([
+    supabase.from('products').select('id, sku, name, price_minor, stock_quantity, image_url, is_active').in('id', productIds),
+    getSiteSettings(supabase),
+  ])
 
   if (error) throw new Error('Could not load product data to price the basket.')
 
@@ -97,7 +104,7 @@ export async function priceBasket(supabase: SupabaseClient, lines: BasketLine[])
   const subtotalMinor = pricedLines
     .filter((l) => l.available)
     .reduce((sum, l) => sum + l.unitPriceMinor * Math.min(l.quantity, l.maxAvailableQuantity), 0)
-  const deliveryMinor = calculateDeliveryMinor(subtotalMinor)
+  const deliveryMinor = calculateDeliveryMinor(subtotalMinor, settings.deliveryStandardMinor, settings.deliveryFreeThresholdMinor)
 
   return {
     lines: pricedLines,

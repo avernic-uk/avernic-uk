@@ -7,30 +7,8 @@ import { Accordion } from '@/components/ui/Accordion'
 import { Alert } from '@/components/ui/Alert'
 import { useDocumentMeta } from '@/lib/useDocumentMeta'
 import { getFeaturedProducts, getCategories } from '@/lib/api/products'
+import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 import type { Product, ProductCategory } from '@/types'
-
-const homeFaqs = [
-  {
-    question: 'Are these medical products?',
-    answer: 'No — everything we sell is a cosmetic skincare product applied topically. Nothing on Avernic UK is a medicine and nothing is intended for injection or internal use.',
-  },
-  {
-    question: 'Where do you deliver?',
-    answer: 'Avernic UK delivers to addresses within the United Kingdom only. We do not currently offer international shipping.',
-  },
-  {
-    question: 'How do I pay?',
-    answer: 'Checkout is completed securely via Open Banking, powered by Fena. You authorise payment directly from your own bank — we never see or store your banking details.',
-  },
-  {
-    question: 'How long does delivery take?',
-    answer: 'See our Delivery information page for current delivery options and estimated timescales.',
-  },
-  {
-    question: 'Can I return an item?',
-    answer: 'Yes — see our Returns & refunds page for eligibility and how to start a return.',
-  },
-]
 
 const steps = [
   { title: 'Choose your products', description: 'Browse our range and add what you need to your basket.' },
@@ -46,6 +24,7 @@ export default function HomePage() {
       'Shop peptide serums, moisturisers and treatments online at Avernic UK. Cosmetic skincare only, UK delivery, secure Open Banking payment. 18+.',
   })
 
+  const { settings, faqs } = useSiteSettings()
   const [featured, setFeatured] = useState<Product[] | null>(null)
   const [categories, setCategories] = useState<ProductCategory[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -83,13 +62,9 @@ export default function HomePage() {
           <div className="animate-slide-up">
             <span className="eyebrow">UK delivery · Open Banking checkout</span>
             <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-ink-950 sm:text-5xl lg:text-6xl">
-              Peptide skincare, made <span className="text-brass animate-shimmer">simpler</span>.
+              {settings.heroHeading}
             </h1>
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-ink-600 sm:text-lg">
-              Cosmetic peptide serums, moisturisers and treatments, chosen with care and delivered
-              across the United Kingdom — with a straightforward checkout and secure Open Banking
-              payment.
-            </p>
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-ink-600 sm:text-lg">{settings.heroSubheading}</p>
             <div className="mt-9 flex flex-wrap gap-3">
               <ButtonLink to="/shop" variant="accent" size="lg">
                 Shop now
@@ -152,6 +127,84 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Quality & testing */}
+      <section className="relative overflow-hidden bg-ink-950 dark:bg-ink-100">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-accent-500/20 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-accent-500/10 blur-3xl" />
+        </div>
+        <div className="container-page relative py-16 sm:py-20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <span className="eyebrow text-accent-400 dark:text-accent-600">Quality assurance</span>
+              <h2 className="mt-3 max-w-xl font-display text-2xl font-semibold text-white dark:text-ink-950 sm:text-3xl">
+                Every formulation is HPLC-tested before it reaches you.
+              </h2>
+            </div>
+            <p className="max-w-sm text-sm leading-relaxed text-ink-300 dark:text-ink-600">
+              We use HPLC (High-Performance Liquid Chromatography) — a laboratory technique for
+              verifying the purity and concentration of active ingredients — to check every
+              skincare formulation we sell.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                icon: (
+                  <path
+                    d="M9 3h6M10 3v5.2a3 3 0 0 1-.5 1.66L5.9 15.7A2 2 0 0 0 7.6 19h8.8a2 2 0 0 0 1.7-3.3l-3.6-5.85A3 3 0 0 1 14 8.2V3M7.5 14.5h9"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                ),
+                title: 'HPLC-verified purity',
+                description: 'Active ingredient purity and concentration are checked by HPLC chromatography before a batch is approved for sale.',
+              },
+              {
+                icon: (
+                  <path
+                    d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                ),
+                title: 'Cosmetic-grade, never medicinal',
+                description: 'Testing confirms formulation quality for topical cosmetic use — our products are skincare, not medicines, and make no medical claims.',
+              },
+              {
+                icon: (
+                  <path
+                    d="M4 17V7a1 1 0 0 1 1-1h9v11M4 17h1m0 0h9m0 0h2m0 0h1a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.29-.7L18.5 9.4a1 1 0 0 0-.7-.3H14M4 17a2 2 0 1 0 4 0m8 0a2 2 0 1 0 4 0"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                ),
+                title: 'Delivered with confidence',
+                description: 'Every order is dispatched only once its formulation has cleared our testing process — quality checked before it ships, not after.',
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm dark:border-ink-950/10 dark:bg-ink-950/[0.03]"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-8 w-8 text-accent-400 dark:text-accent-600">
+                  {item.icon}
+                </svg>
+                <h3 className="mt-4 text-sm font-semibold text-white dark:text-ink-950">{item.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-300 dark:text-ink-600">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Categories */}
       <section className="border-y border-ink-200/60 bg-ink-50/60 dark:bg-ink-50/40">
         <div className="container-page py-16 sm:py-20">
@@ -193,7 +246,7 @@ export default function HomePage() {
           <span className="eyebrow">Help</span>
           <h2 className="mt-3 text-2xl font-semibold text-ink-950 sm:text-3xl">Frequently asked questions</h2>
           <div className="mt-8">
-            <Accordion items={homeFaqs} />
+            <Accordion items={faqs} />
           </div>
           <p className="mt-6 text-sm text-ink-600">
             Have another question?{' '}

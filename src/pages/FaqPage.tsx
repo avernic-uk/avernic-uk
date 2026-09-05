@@ -1,5 +1,6 @@
 import { InfoPageLayout } from '@/components/layout/InfoPageLayout'
 import { Accordion } from '@/components/ui/Accordion'
+import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 
 const faqSections: { heading: string; items: { question: string; answer: string }[] }[] = [
   {
@@ -32,9 +33,18 @@ const faqSections: { heading: string; items: { question: string; answer: string 
 ]
 
 export default function FaqPage() {
+  const { faqs } = useSiteSettings()
   return (
     <InfoPageLayout title="Frequently asked questions" description="Answers to common questions about ordering, payment, delivery and returns at Avernic UK.">
       <div className="space-y-10">
+        {faqs.length > 0 && (
+          <section>
+            <h2 className="text-lg font-semibold text-ink-900">General questions</h2>
+            <div className="mt-4">
+              <Accordion items={faqs} />
+            </div>
+          </section>
+        )}
         {faqSections.map((section) => (
           <section key={section.heading}>
             <h2 className="text-lg font-semibold text-ink-900">{section.heading}</h2>

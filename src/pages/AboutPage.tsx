@@ -1,6 +1,8 @@
 import { InfoPageLayout, Placeholder } from '@/components/layout/InfoPageLayout'
+import { useSiteSettings } from '@/lib/settings/SiteSettingsProvider'
 
 export default function AboutPage() {
+  const { settings } = useSiteSettings()
   return (
     <InfoPageLayout title="About Avernic UK" description="Learn about Avernic UK, a UK-based online retailer of cosmetic peptide skincare.">
       <p>
@@ -20,12 +22,21 @@ export default function AboutPage() {
         intended for injection or internal use. Our products are intended for adults aged 18 and
         over — see the notice on every page.
       </p>
+      <h2 className="text-lg font-semibold text-ink-900">Quality and testing</h2>
+      <p>
+        Every skincare formulation we sell is tested using HPLC (High-Performance Liquid
+        Chromatography) — a laboratory technique used to verify the purity and concentration of
+        active ingredients — before a batch is approved for sale. This checks formulation quality
+        for cosmetic use; it doesn't change what the product is, and our products remain cosmetic
+        skincare rather than medicines.
+      </p>
       <h2 className="text-lg font-semibold text-ink-900">Our business</h2>
       <p>
-        Avernic UK is operated by <Placeholder>legal company name</Placeholder>, a company
+        Avernic UK is operated by{' '}
+        {settings.companyName || <Placeholder>legal company name</Placeholder>}, a company
         registered in England and Wales under company number{' '}
-        <Placeholder>company registration number</Placeholder>. Our registered office is at{' '}
-        <Placeholder>registered business address</Placeholder>.
+        {settings.companyNumber || <Placeholder>company registration number</Placeholder>}. Our
+        registered office is at {settings.registeredAddress || <Placeholder>registered business address</Placeholder>}.
       </p>
       <h2 className="text-lg font-semibold text-ink-900">Get in touch</h2>
       <p>

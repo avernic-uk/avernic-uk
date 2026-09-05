@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input'
 import { Button, ButtonLink } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
+import { CheckoutSteps } from '@/components/checkout/CheckoutSteps'
 
 interface OrderDetail {
   orderNumber: string
@@ -127,16 +128,18 @@ export default function OrderConfirmationPage() {
   if (!order) return null
 
   return (
-    <div className="container-page max-w-2xl py-10 sm:py-14">
+    <div className="container-page max-w-2xl py-8 sm:py-12">
+      <CheckoutSteps current="confirmation" />
+
       {notice && (
-        <div className="mb-6">
+        <div className="mb-6 mt-6">
           <Alert tone="warning" title="Payment not yet completed">
             {notice}
           </Alert>
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-success-700">
+      <div className="mt-6 flex items-center gap-2 text-success-700">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-6 w-6">
           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.6" />
           <path d="m8 12.5 2.5 2.5L16 9.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />

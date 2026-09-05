@@ -5,6 +5,8 @@ import { Button, ButtonLink } from '@/components/ui/Button'
 import { QuantityStepper } from '@/components/ui/QuantityStepper'
 import { Alert } from '@/components/ui/Alert'
 import { Badge } from '@/components/ui/Badge'
+import { CheckoutSteps } from '@/components/checkout/CheckoutSteps'
+import { SecureCheckoutBadges } from '@/components/checkout/SecureCheckoutBadges'
 
 export default function BasketPage() {
   useDocumentMeta({ title: 'Your basket', noindex: true })
@@ -25,8 +27,11 @@ export default function BasketPage() {
   }
 
   return (
-    <div className="container-page py-10 sm:py-14">
-      <h1 className="text-3xl font-semibold text-ink-950">Your basket</h1>
+    <div className="container-page py-8 sm:py-12">
+      <div className="mx-auto max-w-3xl">
+        <CheckoutSteps current="basket" />
+      </div>
+      <h1 className="mt-6 text-3xl font-semibold text-ink-950">Your basket</h1>
 
       {pricingError && (
         <div className="mt-6">
@@ -88,7 +93,7 @@ export default function BasketPage() {
           </ul>
         </div>
 
-        <aside className="h-fit rounded-2xl border border-ink-200 bg-ink-50/60 p-6">
+        <aside className="h-fit rounded-2xl border border-ink-200 bg-ink-50/60 p-6 lg:sticky lg:top-24">
           <h2 className="text-sm font-semibold text-ink-900">Order summary</h2>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between">
@@ -117,6 +122,9 @@ export default function BasketPage() {
             </ButtonLink>
           )}
           <p className="mt-3 text-center text-xs text-ink-500">UK delivery only. Prices in GBP, inclusive of VAT where applicable.</p>
+          <div className="mt-5 border-t border-ink-200 pt-4">
+            <SecureCheckoutBadges />
+          </div>
         </aside>
       </div>
     </div>
